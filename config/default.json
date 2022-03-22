@@ -1,6 +1,0 @@
-{
-    "mongoURI": "mongodb+srv://iheb05:iheb05@qa.39cbs.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-    "jwtSecret": "mysecret",
-    "mail_api_key":"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",
-    "CLIENT_URL":"http://localhost:3000"
-}
