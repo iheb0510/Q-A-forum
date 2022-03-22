@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const SocialSchema = mongoose.Schema({
   platform: {
@@ -33,7 +33,8 @@ const EduSchema = mongoose.Schema({
 
 const ExperienceSchema = mongoose.Schema({
   role: {
-    type: String,
+    type: Boolean,
+    default: false,
   },
   company: {
     type: String,
@@ -61,6 +62,14 @@ const communitySchema = new mongoose.Schema({
 
 const UserSchema = mongoose.Schema(
   {
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    fullname: {
+      type: String,
+      required: true,
+    },
     username: {
       type: String,
       required: true,
@@ -72,7 +81,8 @@ const UserSchema = mongoose.Schema(
     },
     password: {
       type: String,
-      select: false,
+      select:false,
+      required: true,
     },
     dp: {
       type: String,

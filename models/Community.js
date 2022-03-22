@@ -1,11 +1,11 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema({
   createdby: {
     type: String,
     required: true,
   },
-  Name: {
+  name: {
     type: String,
     required: true,
   },
@@ -27,6 +27,7 @@ const Schema = mongoose.Schema({
   ],
   private: {
     type: Boolean,
+    default: true,
   },
 });
 

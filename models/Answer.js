@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const voteSchema = new mongoose.Schema({
   user: {
@@ -7,27 +7,32 @@ const voteSchema = new mongoose.Schema({
   },
 });
 
-const AnswerSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
-    required: true,
+const AnswerSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'user',
+      required: true,
+    },
+    question: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'question',
+      required: true,
+    },
+    answer: {
+      type: String,
+      required: true,
+    },
+    upvote: [voteSchema],
+    downvote: [voteSchema],
+    solution: {
+      type: Boolean,
+      default: false,
+    },
   },
-  question: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'question',
-    required: true,
-  },
-  answer: {
-    type: String,
-    required: true,
-  },
-  upvote: [voteSchema],
-  downvote: [voteSchema],
-  solution: {
-    type: Boolean,
-    default: false,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
 module.exports = mongoose.model('answer', AnswerSchema);
