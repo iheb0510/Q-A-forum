@@ -173,7 +173,7 @@ router.post(
                   Just click the button below to validate your email address.
               </p>
               
-              <a href=${url} style="background: crimson; text-decoratCAPGEMINIion: none; color: white; padding: 10px 20px; margin: 10px 0; display: inline-block;">Verify your email address</a>
+              <a href=${url} style="background: crimson; text-decoratCAPGEMINIion: none; color: white; padding: 10px 20px; margin: 10px 0; display: inline-block;">Reset your password</a>
           
               <p>If the button doesn't work for any reason, you can also click on the link below:</p>
           
@@ -222,7 +222,7 @@ router.post(
       if (user) {
         if (new_password === confirm_password) {
           const salt = await bcrypt.genSalt(10);
-          user.password = await bcrypt.hash(password, salt);
+          user.password = await bcrypt.hash(new_password, salt);
           await user.save();
           res.status(200);
           res.json({ message: 'Password reset successfully!' });
