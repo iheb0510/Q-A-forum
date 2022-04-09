@@ -1,34 +1,44 @@
 const mongoose = require('mongoose');
 
-const Schema = mongoose.Schema({
-  createdby: {
-    type: String,
-    required: true,
-  },
-  name: {
-    type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  date: {
-    type: Date,
-    default: Date.now,
-  },
-  members: [
-    {
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
-      },
+const Schema = mongoose.Schema(
+  {
+    createdby: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'user',
+      required: true,
     },
-  ],
-  private: {
-    type: Boolean,
-    default: true,
+    name: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    dp: {
+      type: String,
+      default: '/uploads/images/default.png',
+    },
+    cover: {
+      type: String,
+      default: '/uploads/images/cover.png',
+    },
+    members: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'user',
+        },
+      },
+    ],
+    private: {
+      type: Boolean,
+      default: false,
+    },
   },
-});
+  {
+    timestamps: true,
+  }
+);
 
 module.exports = mongoose.model('community', Schema);

@@ -101,6 +101,9 @@ router.post(
   }
 );
 
+// @route     POST api/users/activate
+// @desc      activate a user
+// @access    Public
 router.post(
   '/activate',
   check('token', 'Please add token').not().isEmpty(),
@@ -195,7 +198,7 @@ router.post(
 );
 
 // @route     POST api/users/reset_password
-// @desc      forget password
+// @desc      reset password
 // @access    Public
 router.post(
   '/reset_password',

@@ -81,16 +81,16 @@ const UserSchema = mongoose.Schema(
     },
     password: {
       type: String,
-      select:false,
+      select: false,
       required: true,
     },
     dp: {
       type: String,
-      default: '/uploads/images/default.png',
+      default: 'uploads/images/default.png',
     },
     cover: {
       type: String,
-      default: '/uploads/images/cover.png',
+      default: 'uploads/images/cover.png',
     },
     bio: {
       type: String,
