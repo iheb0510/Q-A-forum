@@ -10,7 +10,7 @@ const upload = require('../middleware/upload');
 
 const User = require('../models/User');
 
-router.put(
+router.post(
   '/',
   [
     auth,
@@ -74,27 +74,6 @@ router.put(
       ).select('-password');
 
       res.json(user);
-    } catch (error) {
-      console.error(error.message);
-      if (error.kind === 'ObjectId') {
-        return res.status(404).json({ message: 'User not Found ' });
-      }
-      res.status(500).send('Server error');
-    }
-  }
-);
-router.put(
-  '/images',
-  auth,
-  upload,
-
-  async (req, res) => {
-    try {
-      if (req.files['dp'])
-        console.log('http://localhost:5000/' + req.files['dp'][0].path);
-
-      if (req.files['cover'])
-        console.log('http://localhost:5000/' + req.files['cover'][0].path);
     } catch (error) {
       console.error(error.message);
       if (error.kind === 'ObjectId') {
