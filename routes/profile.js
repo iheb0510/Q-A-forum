@@ -48,7 +48,7 @@ router.put(
       topSkills,
       otherSkills,
       workStatus,
-    } = req.body;
+    } = req.body.data;
     try {
       const newUser = new User({
         _id: req.user._id,

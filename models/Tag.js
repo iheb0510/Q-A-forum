@@ -8,10 +8,8 @@ const Schema = mongoose.Schema(
     },
     questions: [
       {
-        question: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'question',
-        },
       },
     ],
   },

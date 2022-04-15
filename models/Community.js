@@ -17,7 +17,7 @@ const Schema = mongoose.Schema(
     },
     dp: {
       type: String,
-      default: '/uploads/images/default.png',
+      default: '/uploads/images/community.png',
     },
     cover: {
       type: String,
@@ -25,10 +25,8 @@ const Schema = mongoose.Schema(
     },
     members: [
       {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'user',
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
       },
     ],
     private: {

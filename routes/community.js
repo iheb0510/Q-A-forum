@@ -7,73 +7,34 @@ const auth = require('../middleware/auth');
 const authAdmin = require('../middleware/authAdmin');
 const { check, validationResult } = require('express-validator');
 const upload = require('../middleware/upload');
-
+const Community = require('../models/Community');
 const User = require('../models/User');
+const Request = require('../models/Request');
 
+// @route     POST api/community
+// @desc      Add community
+// @access    private
 router.post(
   '/',
-  [
-    auth,
-    upload,
-    [
-      /*check('fullname', 'fullname is required').not().isEmpty(),
-      check('username', 'username is required').not().isEmpty(),
-      check('bio', 'bio is required').not().isEmpty(),
-      check('location', 'location is required').not().isEmpty(),
-      check('website', 'website is required').not().isEmpty(),
-      check('social', 'social is required').not().isEmpty(),
-      check('education', 'education is required').not().isEmpty(),
-      check('experience', 'experience is required').not().isEmpty(),
-      check('github', 'github is required').not().isEmpty(),
-      check('topSkills', 'topSkills is required').not().isEmpty(),
-      check('otherSkills', 'otherSkills is required').not().isEmpty(),
-      check('workStatus', 'workStatus is required').not().isEmpty(),*/
-    ],
-  ],
+  [auth, upload],
 
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    const {
-      fullname,
-      username,
-      bio,
-      website,
-      social,
-      education,
-      experience,
-      github,
-      topSkills,
-      otherSkills,
-      workStatus,
-    } = req.body;
+    const { name, description, private } = JSON.parse(req.body.data);
     try {
-      const newUser = new User({
-        _id: req.user._id,
+      const user = await User.findById(req.user._id).select('-password');
+      const newCommunity = new Community({
         dp: req.files['dp'] && req.files['dp'][0].path,
         cover: req.files['cover'] && req.files['cover'][0].path,
-        fullname,
-        username,
-        bio,
-        website,
-        social,
-        education,
-        experience,
-        github,
-        topSkills,
-        otherSkills,
-        workStatus,
+        name,
+        description,
+        createdby: user,
+        private,
       });
-
-      const user = await User.findOneAndUpdate(
-        { _id: req.user._id },
-        { $set: newUser },
-        { new: true }
-      ).select('-password');
-
-      res.json(user);
+      newCommunity.members.unshift(user);
+      const community = await newCommunity.save();
+      user.communities.unshift(community);
+      await user.save();
+      res.json(community);
     } catch (error) {
       console.error(error.message);
       if (error.kind === 'ObjectId') {
@@ -83,4 +44,112 @@ router.post(
     }
   }
 );
+
+// @route     POST api/community/add
+// @desc      Add community
+// @access    private
+router.post(
+  '/add',
+  [auth, upload],
+
+  async (req, res) => {
+    const { name, description, private } = JSON.parse(req.body.data);
+    try {
+      const user = await User.findById(req.user._id).select('-password');
+      const newCommunity = new Community({
+        dp: req.files['dp'] && req.files['dp'][0].path,
+        cover: req.files['cover'] && req.files['cover'][0].path,
+        name,
+        description,
+        createdby: user,
+        private,
+      });
+      newCommunity.members.unshift(user);
+      const community = await newCommunity.save();
+      //await user.communities.splice(0, user.communities.length);
+      await user.communities.unshift(community);
+      await user.save();
+      res.json(user.communities);
+    } catch (error) {
+      console.error(error.message);
+      if (error.kind === 'ObjectId') {
+        return res.status(404).json({ message: 'User not Found ' });
+      }
+      res.status(500).send('Server error');
+    }
+  }
+);
+
+// @route     POST api/community/join
+// @desc      Add community
+// @access    private
+router.post(
+  '/join/:id',
+  [auth],
+
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.user._id).select('-password');
+      const community = await Community.findById(req.params.id);
+      const requ = await Request.find({ sentby: req.user._id });
+      const alreadysent = requ.filter(
+        (requete) => requete.community.toString() === req.params.id
+      );
+      console.log(alreadysent.length);
+      if (alreadysent.length > 0) {
+        return res.status(404).json({ message: 'Request already sent ' });
+      }
+      if (community.createdby.toString() === req.user._id) {
+        return res.status(404).json({ message: "it's your community " });
+      }
+      const newRequest = new Request({
+        sentby: user,
+        sendto: community.createdby,
+        community,
+      });
+      const request = await newRequest.save();
+      res.json(request);
+    } catch (error) {
+      console.error(error.message);
+      if (error.kind === 'ObjectId') {
+        return res.status(404).json({ message: 'User not Found ' });
+      }
+      res.status(500).send('Server error');
+    }
+  }
+);
+
+// @route     POST api/community/accept
+// @desc      Accept request
+// @access    private
+router.post('/accept/:id', [auth], async (req, res) => {
+  try {
+    const request = await Request.findOneAndUpdate(
+      { _id: req.params.id },
+      { accepted: true },
+      { new: true }
+    );
+    const community = await Community.findById(request.community.toString());
+    const user = await User.findById(request.sentby.toString()).select(
+      '-password'
+    );
+
+    if (community.createdby.toString() !== req.user._id) {
+      return res.status(404).json({ message: "it's not your community " });
+    }
+    community.members.unshift(user);
+    await community.save();
+    //await user.communities.splice(0, user.communities.length);
+    await user.communities.unshift(community);
+    await user.save();
+
+    res.json(request);
+  } catch (error) {
+    console.error(error.message);
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'User not Found ' });
+    }
+    res.status(500).send('Server error');
+  }
+});
 module.exports = router;

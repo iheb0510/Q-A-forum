@@ -19,10 +19,8 @@ const Schema = mongoose.Schema(
     },
     tags: [
       {
-        tag: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'tag',
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'tag',
       },
     ],
     views: [voteSchema],

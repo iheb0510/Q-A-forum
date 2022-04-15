@@ -39,6 +39,10 @@ const upload = multer({
     name: 'cover',
     maxCount: 1,
   },
+  {
+    name: 'data',
+    maxCount: 1,
+  },
 ]);
 
 module.exports = upload;
