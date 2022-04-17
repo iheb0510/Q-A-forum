@@ -45,40 +45,42 @@ router.post(
   }
 );
 
-// @route     POST api/community/add
-// @desc      Add community
+// @route     PUT api/community
+// @desc      Update community
 // @access    private
-router.post(
-  '/add',
-  [auth, upload],
+router.put('/:id', [auth, upload], async (req, res) => {
+  const { name, description, private } = JSON.parse(req.body.data);
+  try {
+    let community = await Community.findById(req.params.id);
+    if (community.createdby.toString() !== req.user._id)
+      res.json("it's not your community");
+    const user = await User.findById(req.user._id).select('-password');
+    const newCommunity = new Community({
+      _id: req.params.id,
+      dp: req.files['dp'] && req.files['dp'][0].path,
+      cover: req.files['cover'] && req.files['cover'][0].path,
+      name,
+      description,
+      createdby: user,
+      private,
+      members: community.members,
+    });
 
-  async (req, res) => {
-    const { name, description, private } = JSON.parse(req.body.data);
-    try {
-      const user = await User.findById(req.user._id).select('-password');
-      const newCommunity = new Community({
-        dp: req.files['dp'] && req.files['dp'][0].path,
-        cover: req.files['cover'] && req.files['cover'][0].path,
-        name,
-        description,
-        createdby: user,
-        private,
-      });
-      newCommunity.members.unshift(user);
-      const community = await newCommunity.save();
-      //await user.communities.splice(0, user.communities.length);
-      await user.communities.unshift(community);
-      await user.save();
-      res.json(user.communities);
-    } catch (error) {
-      console.error(error.message);
-      if (error.kind === 'ObjectId') {
-        return res.status(404).json({ message: 'User not Found ' });
-      }
-      res.status(500).send('Server error');
+    community = await Community.findOneAndUpdate(
+      { _id: req.params.id },
+      { $set: newCommunity },
+      { new: true }
+    );
+
+    res.json(community);
+  } catch (error) {
+    console.error(error.message);
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'User not Found ' });
     }
+    res.status(500).send('Server error');
   }
-);
+});
 
 // @route     POST api/community/join
 // @desc      Add community
@@ -96,19 +98,27 @@ router.post(
         (requete) => requete.community.toString() === req.params.id
       );
       console.log(alreadysent.length);
-      if (alreadysent.length > 0) {
+      /*  if (alreadysent.length > 0) {
         return res.status(404).json({ message: 'Request already sent ' });
-      }
+      }*/
       if (community.createdby.toString() === req.user._id) {
         return res.status(404).json({ message: "it's your community " });
       }
-      const newRequest = new Request({
-        sentby: user,
-        sendto: community.createdby,
-        community,
-      });
-      const request = await newRequest.save();
-      res.json(request);
+      if (community.private === false) {
+        community.members.unshift(user);
+        await community.save();
+        //await user.communities.splice(0, user.communities.length);
+        await user.communities.unshift(community);
+        await user.save();
+      } else {
+        const newRequest = new Request({
+          sentby: user,
+          sendto: community.createdby,
+          community,
+        });
+        await newRequest.save();
+      }
+      res.json(community);
     } catch (error) {
       console.error(error.message);
       if (error.kind === 'ObjectId') {
@@ -124,11 +134,12 @@ router.post(
 // @access    private
 router.post('/accept/:id', [auth], async (req, res) => {
   try {
-    const request = await Request.findOneAndUpdate(
+    /*const request = await Request.findOneAndUpdate(
       { _id: req.params.id },
       { accepted: true },
       { new: true }
-    );
+    );*/
+    const request = await Request.findById(req.params.id);
     const community = await Community.findById(request.community.toString());
     const user = await User.findById(request.sentby.toString()).select(
       '-password'
@@ -143,12 +154,108 @@ router.post('/accept/:id', [auth], async (req, res) => {
     await user.communities.unshift(community);
     await user.save();
 
+    request.accepted = true;
+    await request.save();
     res.json(request);
   } catch (error) {
     console.error(error.message);
     if (error.kind === 'ObjectId') {
       return res.status(404).json({ message: 'User not Found ' });
     }
+    res.status(500).send('Server error');
+  }
+});
+
+// @route     DELETE api/community/refuse
+// @desc      refuse request
+// @access    private
+router.delete('/refuse/:id', [auth], async (req, res) => {
+  try {
+    const request = await Request.findById(req.params.id);
+    const community = await Community.findById(request.community.toString());
+
+    if (community.createdby.toString() !== req.user._id) {
+      return res.status(404).json({ message: "it's not your community " });
+    }
+    request.remove();
+    res.json(request);
+  } catch (error) {
+    console.error(error.message);
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'User not Found ' });
+    }
+    res.status(500).send('Server error');
+  }
+});
+
+// @route     DELETE api/community/delete/:id
+// @desc      delete community
+// @access    private
+router.put('/delete/:id', [auth], async (req, res) => {
+  try {
+    /* await User.updateMany(
+      {},
+      {
+        $set: {
+          communities: [],
+        },
+      }
+    );*/
+    const community = await Community.findById(req.params.id);
+    if (!community) {
+      res.json({ message: 'community not found ' });
+    } else if (community.createdby.toString() !== req.user._id) {
+      return res.status(404).json({ message: "it's not your community " });
+    } else {
+      await Request.deleteMany({ community: community });
+      const user = await User.updateMany(
+        { communities: community },
+        {
+          $pull: {
+            communities: { community },
+          },
+        }
+      );
+
+      await community.remove();
+      res.json(user);
+    }
+  } catch (error) {
+    console.error(error.message);
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'User not Found ' });
+    }
+    res.status(500).send('Server error');
+  }
+});
+
+//@Route GET api/community/requests
+// @Description  Test route
+// @Access private
+router.get('/requests', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    const requests = await Request.find({ accepted: false, sendto: user }).sort(
+      {
+        createdAt: -1,
+      }
+    );
+    res.json(requests);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
+
+//@Route GET api/community/
+// @Description  Test route
+// @Access Public
+router.get('/', async (req, res) => {
+  try {
+    const communities = await Community.find();
+    res.json(communities);
+  } catch (error) {
+    console.error(error.message);
     res.status(500).send('Server error');
   }
 });
