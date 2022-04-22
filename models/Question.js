@@ -24,7 +24,7 @@ const Schema = mongoose.Schema(
       },
     ],
     views: [voteSchema],
-    Community: {
+    community: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'community',
     },
@@ -37,6 +37,7 @@ const Schema = mongoose.Schema(
   },
   {
     timestamps: true,
+    usePushEach: true,
   }
 );
 

@@ -259,4 +259,21 @@ router.get('/', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+//@Route GET api/community/me
+// @Description  get my communities
+// @Access Public
+router.get('/me', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    const communities = await Community.find({
+      _id: { $in: user.communities },
+    });
+    res.json(communities);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
+
 module.exports = router;
