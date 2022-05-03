@@ -12,7 +12,6 @@ const Question = require('../models/question');
 const Community = require('../models/Community');
 const Answer = require('../models/Answer');
 const Tag = require('../models/Tag');
-const { findOneAndUpdate } = require('../models/User');
 
 // @route     GET api/questions/:id
 // @desc      Get Question by community
@@ -120,10 +119,10 @@ router.post(
   }
 );
 
-// @route     POST api/question
-// @desc      Add Question
+// @route     POST api/question/:id
+// @desc      update Question
 // @access    Private
-router.post(
+router.put(
   '/:id',
   [auth],
   check('question', 'question is required').exists(),
@@ -148,7 +147,7 @@ router.post(
           if (tag.length > 1) {
             await Tag.findOneAndUpdate(
               { name: value },
-              { $inc: { count: -1 }, $pull: { questions: {question} } }
+              { $inc: { count: -1 }, $pull: { questions: { question } } }
             );
           } else {
             await tag.remove();
@@ -180,7 +179,7 @@ router.post(
         user,
         question,
         community,
-        tags:Qtags
+        tags: Qtags,
       });
       const quested = await Question.findOneAndUpdate(
         { _id: quest._id },
@@ -198,7 +197,7 @@ router.post(
 // @route     DELETE api/question/:id
 // @desc      delete Question
 // @access    Private
-router.delete("/:id", auth, async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
     const question = await Question.findById(req.params.id);
 
@@ -206,7 +205,7 @@ router.delete("/:id", auth, async (req, res) => {
     if (question.user.toString() !== req.user._id) {
       return res
         .status(404)
-        .json({ message: "You are not authorized to delete this question " });
+        .json({ message: 'You are not authorized to delete this question ' });
     }
     await Promise.all(
       question.tags.map(async (value) => {
@@ -214,7 +213,7 @@ router.delete("/:id", auth, async (req, res) => {
         if (tag.count > 1) {
           await Tag.findOneAndUpdate(
             { _id: value },
-            { $inc: { count: -1 }, $pull: { questions: {question} } }
+            { $inc: { count: -1 }, $pull: { questions: { question } } }
           );
         } else {
           await tag.remove();
@@ -223,95 +222,87 @@ router.delete("/:id", auth, async (req, res) => {
     );
     await Answer.deleteMany({ question: question });
     await question.remove();
-    res.json({ message: "question Deleted" });
+    res.json({ message: 'question Deleted' });
   } catch (error) {
     console.error(error.message);
-    if (error.kind === "ObjectId") {
-      return res.status(404).json({ message: "Question not Found " });
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'Question not Found ' });
     }
-    res.status(500).send("Server error");
+    res.status(500).send('Server error');
   }
 });
-
 
 //@route PUT api/question/upvote/:id
 //@desc Upvoted a question
 //@access Private
-router.put("/upvote/:id", auth, async (req, res) => {
+router.put('/upvote/:id', auth, async (req, res) => {
   try {
     const question = await Question.findById(req.params.id);
-    
-    const questionIds = question.upvotes.map((upvote) => upvote.user.toString());
+
+    const questionIds = question.upvotes.map((upvote) =>
+      upvote.user.toString()
+    );
     const removeIndex = questionIds.indexOf(req.user._id);
 
-    
     //Check if the question is already upvoted by the user
     if (removeIndex !== -1) {
-       
-      question.upvotes.splice(removeIndex, 1); 
-       
-    }else{
+      question.upvotes.splice(removeIndex, 1);
+    } else {
       question.upvotes.unshift({ user: req.user._id });
-      }
-      await question.save();
-      res.json(question.upvotes);
-    }catch (error) {
-        console.error(error.message);
-        if (error.kind === "ObjectId") {
-          return res.status(404).json({ message: "question not Found " });
-        }
-        res.status(500).send("Server error");
-      
     }
-   
+    await question.save();
+    res.json(question.upvotes);
+  } catch (error) {
+    console.error(error.message);
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'question not Found ' });
+    }
+    res.status(500).send('Server error');
+  }
 });
 
 //@route PUT api/question/downvote/:id
 //@desc Downvote a question
 //@access Private
-router.put("/downvote/:id", auth, async (req, res) => {
+router.put('/downvote/:id', auth, async (req, res) => {
   try {
     const question = await Question.findById(req.params.id);
-    
-    const questionIds = question.downvotes.map((downvote) => downvote.user.toString());
+
+    const questionIds = question.downvotes.map((downvote) =>
+      downvote.user.toString()
+    );
     const removeIndex = questionIds.indexOf(req.user._id);
 
     //Check if the question is already downvoted by the user
     if (removeIndex !== -1) {
-       
-      question.downvotes.splice(removeIndex, 1); 
-       
-    }else{
+      question.downvotes.splice(removeIndex, 1);
+    } else {
       question.downvotes.unshift({ user: req.user._id });
-      }
-      await question.save();
-      res.json(question.downvotes);
-    }catch (error) {
-        console.error(error.message);
-        if (error.kind === "ObjectId") {
-          return res.status(404).json({ message: "question not Found " });
-        }
-        res.status(500).send("Server error");
-      
     }
-   
+    await question.save();
+    res.json(question.downvotes);
+  } catch (error) {
+    console.error(error.message);
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'question not Found ' });
+    }
+    res.status(500).send('Server error');
+  }
 });
 
 //@route put api/question/views/:id
 //@desc view a question
 //@access Private
-router.put("/views/:id", auth, async (req, res) => {
+router.put('/views/:id', auth, async (req, res) => {
   try {
     const question = await Question.findById(req.params.id);
 
-    if (!question) {    
-      return res.status(404).json({ message: "question not Found " });
+    if (!question) {
+      return res.status(404).json({ message: 'question not Found ' });
     }
     //Check if the user owns the question
     if (question.user.toString() !== req.user._id) {
-      return res
-        .status(404)
-        .json({ message: "it's your question " });
+      return res.status(404).json({ message: "it's your question " });
     }
 
     question.views.unshift({ user: req.user._id });
@@ -319,10 +310,10 @@ router.put("/views/:id", auth, async (req, res) => {
     res.json(question.views);
   } catch (error) {
     console.error(error.message);
-    if (error.kind === "ObjectId") {
-      return res.status(404).json({ message: "question not Found " });
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'question not Found ' });
     }
-    res.status(500).send("Server error");
+    res.status(500).send('Server error');
   }
-});  
+});
 module.exports = router;
