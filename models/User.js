@@ -117,8 +117,14 @@ const UserSchema = mongoose.Schema(
     twitterId: { type: String },
     githubId: { type: String },
     communities: [communitySchema],
-    badge: { type: String },
-    points: { type: Number },
+    badge: {
+      type: String,
+      default: 'Beginner',
+    },
+    points: {
+      type: Number,
+      default: 20,
+    },
   },
   {
     timestamps: true,

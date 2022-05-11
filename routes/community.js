@@ -10,50 +10,7 @@ const upload = require('../middleware/upload');
 const Community = require('../models/Community');
 const User = require('../models/User');
 const Request = require('../models/Request');
-
-
-//@route POST api/jobs/
-//@desc add job
-//@access Private
-router.post(
-  "/",
-  [auth, [check('description', 'Text is required ').not().isEmpty(),
-  check('price', 'price is required').not().isEmpty(),
-  check('availability', 'availability is required').not().isEmpty(),
-  check('category', 'category is required').not().isEmpty(),
-  check('title', 'title is required').not().isEmpty(),
-  check('skills', 'Skills is required').not().isEmpty()
-]],
-  
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-     const { description, price, availability, category, title , updatedAt , candidates, appliedTo ,skills} = req.body;
-    try {
-      const user = await User.findById(req.user.id).select("-password");
-
-      const newJob = new Job({
-        user: user,
-        description,
-        price,
-        availability,
-        category,
-        title,
-        updatedAt,
-        candidates,
-        appliedTo,
-        skills
-      });
-      const job = await newJob.save();
-      res.json(job);
-    } catch (error) {
-      console.error(error.message);
-      res.status(500).send("Server error");
-    }
-  }
-);
+const updatePoints = require('../utils/updatePoints');
 
 // @route     POST api/community
 // @desc      Add community
@@ -78,6 +35,7 @@ router.post(
       const community = await newCommunity.save();
       user.communities.unshift(community);
       await user.save();
+      await updatePoints(user._id, 5);
       res.json(community);
     } catch (error) {
       console.error(error.message);
@@ -154,6 +112,8 @@ router.post(
         //await user.communities.splice(0, user.communities.length);
         await user.communities.unshift(community);
         await user.save();
+        await updatePoints(community.createdby.toString(), 3);
+        await updatePoints(user._id, 1);
       } else {
         const newRequest = new Request({
           sentby: user,
@@ -200,6 +160,8 @@ router.post('/accept/:id', [auth], async (req, res) => {
 
     request.accepted = true;
     await request.save();
+    await updatePoints(community.createdby.toString(), 3);
+    await updatePoints(user._id, 1);
     res.json(request);
   } catch (error) {
     console.error(error.message);
@@ -260,7 +222,7 @@ router.put('/delete/:id', [auth], async (req, res) => {
           },
         }
       );
-
+      await updatePoints(community.createdby.toString(), -20);
       await community.remove();
       res.json(user);
     }

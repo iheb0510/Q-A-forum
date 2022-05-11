@@ -23,8 +23,24 @@ const AnswerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    upvote: [voteSchema],
-    downvote: [voteSchema],
+    upvotes: [voteSchema],
+    downvotes: [voteSchema],
+    comments: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'user',
+        },
+        text: {
+          type: String,
+          require: true,
+        },
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
     solution: {
       type: Boolean,
       default: false,

@@ -22,4 +22,15 @@ app.use('/api/answer', require('./routes/answer'));
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+const server = app.listen(PORT, () =>
+  console.log(`Server started on port ${PORT}`)
+);
+
+// Socket Layer over Http Server
+const socket = require('socket.io')(server);
+// On every Client Connection
+socket.on('connection', (socket) => {
+  console.log('Socket: client connected');
+});
+
+exports.socket=socket

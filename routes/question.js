@@ -12,6 +12,7 @@ const Question = require('../models/question');
 const Community = require('../models/Community');
 const Answer = require('../models/Answer');
 const Tag = require('../models/Tag');
+const updatePoints = require('../utils/updatePoints');
 
 // @route     GET api/questions/:id
 // @desc      Get Question by community
@@ -111,6 +112,7 @@ router.post(
         { $push: { tags: { $each: Qtags } } },
         { new: true }
       );
+      await updatePoints(user._id, 2);
       res.json(quested);
     } catch (err) {
       console.error(err.message);
@@ -200,6 +202,7 @@ router.put(
 router.delete('/:id', auth, async (req, res) => {
   try {
     const question = await Question.findById(req.params.id);
+    const user = await User.findById(req.user._id).select('-password');
 
     //Check if the user owns the post
     if (question.user.toString() !== req.user._id) {
@@ -209,18 +212,23 @@ router.delete('/:id', auth, async (req, res) => {
     }
     await Promise.all(
       question.tags.map(async (value) => {
-        let tag = await Tag.find({ _id: value });
+        console.log('value', value);
+        let tag = await Tag.findOne({ _id: value });
+        console.log('tag', tag);
         if (tag.count > 1) {
+          //console.log('dd', tag);
+          //console.log('q', question);
           await Tag.findOneAndUpdate(
-            { _id: value },
-            { $inc: { count: -1 }, $pull: { questions: { question } } }
+            { _id: tag._id },
+            { $inc: { count: -1 }, $pull: { questions: question._id } }
           );
         } else {
-          await tag.remove();
+          await Tag.deleteOne({ _id: value });
         }
       })
     );
     await Answer.deleteMany({ question: question });
+    await updatePoints(user._id, -2);
     await question.remove();
     res.json({ message: 'question Deleted' });
   } catch (error) {
@@ -244,11 +252,21 @@ router.put('/upvote/:id', auth, async (req, res) => {
     );
     const removeIndex = questionIds.indexOf(req.user._id);
 
+    const questionIds2 = question.downvotes.map((downvote) =>
+      downvote.user.toString()
+    );
+    const removeIndex2 = questionIds2.indexOf(req.user._id);
+
     //Check if the question is already upvoted by the user
-    if (removeIndex !== -1) {
-      question.upvotes.splice(removeIndex, 1);
-    } else {
+    if (removeIndex2 !== -1) {
+      question.downvotes.splice(removeIndex2, 1);
       question.upvotes.unshift({ user: req.user._id });
+    } else {
+      if (removeIndex !== -1) {
+        question.upvotes.splice(removeIndex, 1);
+      } else {
+        question.upvotes.unshift({ user: req.user._id });
+      }
     }
     await question.save();
     res.json(question.upvotes);
@@ -273,11 +291,21 @@ router.put('/downvote/:id', auth, async (req, res) => {
     );
     const removeIndex = questionIds.indexOf(req.user._id);
 
+    const questionIds2 = question.upvotes.map((upvote) =>
+      upvote.user.toString()
+    );
+    const removeIndex2 = questionIds2.indexOf(req.user._id);
+
     //Check if the question is already downvoted by the user
-    if (removeIndex !== -1) {
-      question.downvotes.splice(removeIndex, 1);
-    } else {
+    if (removeIndex2 !== -1) {
+      question.upvotes.splice(removeIndex2, 1);
       question.downvotes.unshift({ user: req.user._id });
+    } else {
+      if (removeIndex !== -1) {
+        question.downvotes.splice(removeIndex, 1);
+      } else {
+        question.downvotes.unshift({ user: req.user._id });
+      }
     }
     await question.save();
     res.json(question.downvotes);
@@ -301,10 +329,14 @@ router.put('/views/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'question not Found ' });
     }
     //Check if the user owns the question
-    if (question.user.toString() !== req.user._id) {
+    if (question.user.toString() === req.user._id) {
       return res.status(404).json({ message: "it's your question " });
     }
-
+    const questionIds = question.views.map((view) => view.user.toString());
+    const removeIndex = questionIds.indexOf(req.user._id);
+    if (removeIndex !== -1) {
+      return res.status(404).json({ message: 'déja vu' });
+    }
     question.views.unshift({ user: req.user._id });
     await question.save();
     res.json(question.views);

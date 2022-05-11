@@ -12,6 +12,7 @@ const Question = require('../models/question');
 const Community = require('../models/Community');
 const Answer = require('../models/Answer');
 const Tag = require('../models/Tag');
+const updatePoints = require('../utils/updatePoints');
 
 //@route POST api/answer/
 //@desc add answer
@@ -33,7 +34,7 @@ router.post(
     }
     const { answer, questionId } = req.body;
     try {
-      const user = await User.findById(req.user.id).select('-password');
+      const user = await User.findById(req.user._id).select('-password');
       const question = await Question.findById(questionId);
 
       const newAnswer = new Answer({
@@ -42,6 +43,7 @@ router.post(
         answer,
       });
       const response = await newAnswer.save();
+      await updatePoints(user._id, -2);
       res.json(response);
     } catch (error) {
       console.error(error.message);
@@ -70,7 +72,7 @@ router.put(
     }
     const { answer, questionId } = req.body;
     try {
-      const user = await User.findById(req.user.id).select('-password');
+      const user = await User.findById(req.user._id).select('-password');
       const question = await Question.findById(questionId);
 
       const newAnswer = new Answer({
@@ -106,6 +108,7 @@ router.delete('/:id', auth, async (req, res) => {
         .json({ message: 'You are not authorized to delete this answer ' });
     }
     await answer.remove();
+    await updatePoints(answer.user, -2);
     res.json({ message: 'answer Deleted' });
   } catch (error) {
     console.error(error.message);
@@ -136,18 +139,27 @@ router.get('/:id', [auth], async (req, res) => {
 router.put('/upvote/:id', auth, async (req, res) => {
   try {
     const answer = await Answer.findById(req.params.id);
+    const answersIds = answer.upvotes.map((upvote) => upvote.user.toString());
+    const removeIndex = answersIds.indexOf(req.user._id);
 
-    const answerIds = answer.upvotes.map((upvote) => upvote.user.toString());
-    const removeIndex = answerIds.indexOf(req.user._id);
+    const answersIds2 = answer.downvotes.map((downvote) =>
+      downvote.user.toString()
+    );
+    const removeIndex2 = answersIds2.indexOf(req.user._id);
 
-    //Check if the answer is already upvoted by the user
-    if (removeIndex !== -1) {
-      answer.upvotes.splice(removeIndex, 1);
-    } else {
+    //Check if the question is already upvoted by the user
+    if (removeIndex2 !== -1) {
+      answer.downvotes.splice(removeIndex2, 1);
       answer.upvotes.unshift({ user: req.user._id });
+    } else {
+      if (removeIndex !== -1) {
+        answer.upvotes.splice(removeIndex, 1);
+      } else {
+        answer.upvotes.unshift({ user: req.user._id });
+      }
     }
     await answer.save();
-    res.json(answer.upvotes);
+    res.json(answer);
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server error');
@@ -166,14 +178,22 @@ router.put('/downvote/:id', auth, async (req, res) => {
     );
     const removeIndex = answerIds.indexOf(req.user._id);
 
-    //Check if the answer is already downvoted by the user
-    if (removeIndex !== -1) {
-      answer.downvotes.splice(removeIndex, 1);
-    } else {
+    const answerIds2 = answer.upvotes.map((upvote) => upvote.user.toString());
+    const removeIndex2 = answerIds2.indexOf(req.user._id);
+
+    //Check if the question is already downvoted by the user
+    if (removeIndex2 !== -1) {
+      answer.upvotes.splice(removeIndex2, 1);
       answer.downvotes.unshift({ user: req.user._id });
+    } else {
+      if (removeIndex !== -1) {
+        answer.downvotes.splice(removeIndex, 1);
+      } else {
+        answer.downvotes.unshift({ user: req.user._id });
+      }
     }
     await answer.save();
-    res.json(answer.downvotes);
+    res.json(answer);
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server error');
@@ -185,6 +205,13 @@ router.put('/downvote/:id', auth, async (req, res) => {
 //@access Private
 router.put('/solved/:id', auth, async (req, res) => {
   try {
+    const ans = await Answer.findById(req.params.id);
+    const quest = await Question.findById(ans.question);
+    if (quest.user.toString() !== req.user._id) {
+      return res
+        .status(404)
+        .json({ message: 'You are not authorized to mark this as solved ' });
+    }
     const answer = await Answer.findOneAndUpdate(
       { _id: req.params.id },
       { $set: { solution: true } },
@@ -195,11 +222,110 @@ router.put('/solved/:id', auth, async (req, res) => {
       { $set: { solved: true } },
       { new: true }
     );
+    await updatePoints(answer.user, 10);
+    await updatePoints(question.user, 5);
     res.json(question);
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server error');
   }
 });
+
+//@author Iheb Laribi
+//@route Put api/answer/comment/:id
+//@desc comment a job
+//@access Private
+router.put(
+  '/comment/:id',
+  [auth, [check('text', 'Text must be required ').not().isEmpty()]],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+      const answer = await Answer.findById(req.params.id);
+      const user = await User.findById(req.user._id).select('-password');
+      const newComment = {
+        user,
+        text: req.body.text,
+      };
+
+      answer.comments.unshift(newComment);
+      await answer.save();
+      res.json(answer.comments);
+    } catch (error) {
+      console.error(error.message);
+      if (error.kind === 'ObjectId') {
+        return res.status(404).json({ message: 'answer not Found ' });
+      }
+      res.status(500).send('Server error');
+    }
+  }
+);
+
+//@route DELETE api/answer/comment/delete/:id/:id_com
+//@desc delete a comment
+//@access Private
+router.put('/comment/delete/:id/:id_com', auth, async (req, res) => {
+  try {
+    const answer = await Answer.findById(req.params.id);
+
+    const answerIds = answer.comments.map((comment) => comment._id.toString());
+
+    const removeIndex = answerIds.indexOf(req.params.id_com);
+    console.log(removeIndex);
+    //Check if the answer is already liked by the user
+    if (removeIndex !== -1) {
+      answer.comments.splice(removeIndex, 1);
+      await answer.save();
+      res.json(answer.comments);
+    }
+  } catch (error) {
+    console.error(error.message);
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'answer not Found ' });
+    }
+    res.status(500).send('Server error');
+  }
+});
+
+//@route UPDATE api/answer/comment/:id/:id_com
+//@desc update a comment
+//@access Private
+router.put(
+  '/comment/:id/:id_com',
+  [auth, [check('text', 'Text is required').not().isEmpty()]],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const answer = await Answer.findOne({ _id: req.params.id });
+      const user = await User.findById(req.user._id).select('-password');
+      const newComment = {
+        user: user,
+        text: req.body.text,
+      };
+
+      //Get index
+      const updateIndex = answer.comments
+        .map((item) => item.id)
+        .indexOf(req.params.id_com);
+
+      answer.comments[updateIndex] = newComment;
+      await answer.save();
+      res.json(answer);
+    } catch (error) {
+      console.error(error.message);
+      if (error.kind === 'ObjectId') {
+        return res.status(404).json({ message: 'answer not Found ' });
+      }
+      res.status(500).send('Server error');
+    }
+  }
+);
 
 module.exports = router;
