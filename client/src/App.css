@@ -1,0 +1,31 @@
+.image_center {
+  object-fit: cover;
+  object-position: center;
+}
+.dev_dp_cover .cover {
+  z-index: -999;
+}
+.dev_dp_cover .dp {
+  margin-left: 13px;
+}
+.dev_dp_cover .dp img {
+  z-index: 1000;
+  margin-top: -90px;
+}
+
+/* Loader CSS */
+.loader {
+  width: 25px;
+  height: 25px;
+}
+.comment-loader {
+  width: 30px;
+  height: 30px;
+}
+.react-tag-input {
+  background-color: transparent;
+  border: none;
+  box-shadow: inset 0px 1px 8px rgba(0, 0, 0, 0.2);
+  font-size: 13px;
+  margin-top: 5px;
+}
