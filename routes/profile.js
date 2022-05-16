@@ -104,4 +104,16 @@ router.put(
     }
   }
 );
+//@Route GET api/profile/
+// @Description  Test route
+// @Access Public
+router.get('/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    res.json(user);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
 module.exports = router;

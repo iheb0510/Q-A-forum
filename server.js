@@ -1,5 +1,6 @@
 const express = require('express');
 const connectDB = require('./config/db');
+const cors = require('cors');
 
 const app = express();
 
@@ -9,6 +10,18 @@ connectDB();
 // Init Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+const whitelist = ['http://localhost:3000'];
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+};
+app.use(cors(corsOptions));
 //upload folder static routes
 app.use('/uploads', express.static('uploads'));
 
@@ -33,4 +46,4 @@ socket.on('connection', (socket) => {
   console.log('Socket: client connected');
 });
 
-exports.socket=socket
+exports.socket = socket;

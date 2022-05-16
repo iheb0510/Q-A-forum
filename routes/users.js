@@ -31,19 +31,29 @@ router.post(
     'password',
     'Please enter a password with 6 or more characters'
   ).isLength({ min: 6 }),
+  check(
+    'c_password',
+    'Please enter a password with 6 or more characters'
+  ).isLength({ min: 6 }),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { username, fullname, email, password } = req.body;
+    const { username, fullname, email, password, c_password } = req.body;
 
     try {
       let user = await User.findOne({ email });
 
       if (user) {
         return res.status(400).json({ msg: 'User already exists' });
+      }
+
+      if (password !== c_password) {
+        return res
+          .status(400)
+          .json({ msg: 'Confirm password does not match!' });
       }
 
       user = new User({
@@ -69,7 +79,7 @@ router.post(
         },
         async (err, token) => {
           if (err) throw err;
-          const url = `${config.get('CLIENT_URL')}/users/activate/${token}`;
+          const url = `${config.get('CLIENT_URL')}/activate/${token}`;
           await transporter.sendMail({
             to: email,
             from: 'qqaforum@gmail.com',
@@ -162,9 +172,7 @@ router.post(
         },
         async (err, token) => {
           if (err) throw err;
-          const url = `${config.get(
-            'CLIENT_URL'
-          )}/users/forget-password/${token}`;
+          const url = `${config.get('CLIENT_URL')}/recover-password/${token}`;
           await transporter.sendMail({
             to: email,
             from: 'qqaforum@gmail.com',
