@@ -29,7 +29,8 @@ const Header = () => {
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(getProfile(userInfo?.user?._id));
-      console.log(user);
+      console.log("token",userInfo.token);
+      console.log("ff",user);
     }
   }, [dispatch, userInfo?.user?._id, isAuthenticated]);
 

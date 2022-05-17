@@ -12,7 +12,7 @@ export const getProfile = (id) => async (dispatch, getState) => {
     } = getState();
     const config = {
       headers: {
-        Authorization: `Bearer ${userInfo.token}`,
+        'x-auth-token': `${userInfo.token}`,
       },
     };
     const { data } = await axios.get(`${baseURL}/api/profile/${id}`, config);

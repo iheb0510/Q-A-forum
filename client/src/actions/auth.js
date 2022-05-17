@@ -114,7 +114,7 @@ export const activateAccount = (token) => async (dispatch) => {
   } catch (err) {
     dispatch({
       type: SET_ERROR,
-      payload: err.response.statusText,
+      payload: err.response.data.msg,
     });
   }
 };
@@ -186,5 +186,10 @@ export const resetPassword =
 export const setLoading = () => async (dispatch) => {
   dispatch({
     type: SET_LOADING,
+  });
+};
+export const clearError = () => async (dispatch) => {
+  dispatch({
+    type: CLEAR_ERROR,
   });
 };

@@ -29,7 +29,7 @@ function App() {
             />
             <Route path='/activate/:token' element={<ActivateAccount />} />
             <Route
-              path='/h'
+              path='/h/*'
               element={
                 <PrivateRoute>
                   <HomeScreen />

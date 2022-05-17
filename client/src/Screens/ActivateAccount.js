@@ -1,16 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { activateAccount } from '../actions/auth';
+import { activateAccount, clearError } from '../actions/auth';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const ActivateAccount = ({ history }) => {
   const { token } = useParams();
   const dispatch = useDispatch();
-  //  const signIn = useSelector((state) => state.auth);
-  //const { isAuthenticated } = signIn;
+  const navigate = useNavigate();
+  const signIn = useSelector((state) => state.auth);
+  const { isAuthenticated, error } = signIn;
 
   useEffect(() => {
-    dispatch(activateAccount(token));
+    dispatch(clearError());
+    if (isAuthenticated) {
+      navigate('/h');
+    } else {
+      dispatch(activateAccount(token));
+    }
   }, []);
 
   return (

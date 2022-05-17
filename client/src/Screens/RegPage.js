@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link ,useNavigate} from 'react-router-dom';
 import logo from '../logo.png';
 import { Formik } from 'formik';
 import * as yup from 'yup';
@@ -11,13 +11,14 @@ import Loader from '../Components/Loader';
 
 const RegPage = ({ history }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const signIn = useSelector((state) => state.auth);
   const { isAuthenticated,loading,error } = signIn;
   const[ok,setOk]=useState(false)
 
   useEffect(() => {
     if (isAuthenticated) {
-      history.push('/h');
+      navigate('/h');
     }
     return () => {};
   }, [history, isAuthenticated]);

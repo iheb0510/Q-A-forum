@@ -107,7 +107,7 @@ router.put(
 //@Route GET api/profile/
 // @Description  Test route
 // @Access Public
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
     res.json(user);

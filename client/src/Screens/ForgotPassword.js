@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from '../Components/Alert';
 import Spinner from '../Components/Spinner';
@@ -7,11 +8,18 @@ import { forgetPassword } from '../actions/auth';
 
 const ForgotPassword = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [ok, setOk] = useState(false);
 
   const resetPassword = useSelector((state) => state.auth);
-  const { loading, error } = resetPassword;
+  const { loading, error, isAuthenticated } = resetPassword;
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/h');
+    }
+    return () => {};
+  }, [isAuthenticated]);
 
   const submitHandler = (e) => {
     e.preventDefault();
