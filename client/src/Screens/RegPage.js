@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Alert from '../Components/Alert';
 import Loader from '../Components/Loader';
 
-const RegPage = ({ history }) => {
+const RegPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const signIn = useSelector((state) => state.auth);
@@ -21,7 +21,7 @@ const RegPage = ({ history }) => {
       navigate('/h');
     }
     return () => {};
-  }, [history, isAuthenticated]);
+  }, [isAuthenticated]);
 
   const fieldValidationSchema = yup.object({
     fullname: yup

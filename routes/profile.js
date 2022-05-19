@@ -40,6 +40,7 @@ router.put(
       fullname,
       username,
       bio,
+      location,
       website,
       social,
       education,
@@ -48,14 +49,16 @@ router.put(
       topSkills,
       otherSkills,
       workStatus,
-    } = req.body.data;
+    } = JSON.parse(req.body.data);
     try {
+      const us = await User.findById(req.user._id).select('-password');
       const newUser = new User({
         _id: req.user._id,
-        dp: req.files['dp'] && req.files['dp'][0].path,
-        cover: req.files['cover'] && req.files['cover'][0].path,
+        dp: req.files['dp'] ? req.files['dp'][0].path : us.dp,
+        cover: req.files['cover'] ? req.files['cover'][0].path : us.cover,
         fullname,
         username,
+        location,
         bio,
         website,
         social,
@@ -65,14 +68,17 @@ router.put(
         topSkills,
         otherSkills,
         workStatus,
+        communities:us.communities,
+        points:us.points,
+        badge:us.badge
       });
 
       const user = await User.findOneAndUpdate(
         { _id: req.user._id },
         { $set: newUser },
         { new: true }
-      ).select('-password');
-
+      )
+      console.log(user);
       res.json(user);
     } catch (error) {
       console.error(error.message);

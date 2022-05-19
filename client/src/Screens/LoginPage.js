@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Alert from '../Components/Alert';
 import Spinner from '../Components/Spinner';
 
-const LoginPage = ({ history }) => {
+const LoginPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const signIn = useSelector((state) => state.auth);
@@ -21,7 +21,7 @@ const LoginPage = ({ history }) => {
       navigate('/h');
     }
     return () => {};
-  }, [history, isAuthenticated, dispatch]);
+  }, [isAuthenticated, dispatch]);
 
   const fieldValidationSchema = yup.object({
     email: yup.string().email().required('Required!'),
