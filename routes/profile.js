@@ -68,16 +68,16 @@ router.put(
         topSkills,
         otherSkills,
         workStatus,
-        communities:us.communities,
-        points:us.points,
-        badge:us.badge
+        communities: us.communities,
+        points: us.points,
+        badge: us.badge,
       });
 
       const user = await User.findOneAndUpdate(
         { _id: req.user._id },
         { $set: newUser },
         { new: true }
-      )
+      );
       console.log(user);
       res.json(user);
     } catch (error) {

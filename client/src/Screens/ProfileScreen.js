@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { editProfile, getProfile } from '../actions/profile';
 
 import axios from 'axios';
+import GithubScreen from './GithubScreen';
 import Alert from '../Components/Alert';
 import baseURL from '../baseURL';
 import Modal from '../Components/Modal';
@@ -12,6 +13,7 @@ import Spinner from '../Components/Spinner';
 import { Field, FieldArray, Formik } from 'formik';
 import MyTextField from '../Components/MyTextField';
 import * as yup from 'yup';
+import DevAboutScreen from './DevAboutScreen';
 
 const ProfileScreen = () => {
   const dispatch = useDispatch();
@@ -36,6 +38,7 @@ const ProfileScreen = () => {
   useEffect(() => {
     const fetch = () => {
       dispatch(getProfile(userInfo?.user?._id));
+      console.log(userInfo?.user?._id);
     };
 
     return fetch;
@@ -62,7 +65,6 @@ const ProfileScreen = () => {
       .max(15, 'Must be 15 charecter or less!')
       .min(4, 'At least 4 charecter!')
       .required('Required!'),
-    email: yup.string().email().required('Required!'),
     bio: yup.string().max(150, 'Max 150 charecters').min(5, 'Min 5 charecter'),
     location: yup.string().max(100).min(5, 'Min 5 charecter'),
     website: yup.string().max(100).min(5, 'Min 5 charecter').url(),
@@ -372,7 +374,6 @@ const ProfileScreen = () => {
               initialValues={{
                 fullname: user?.fullname,
                 username: user?.username,
-                email: user?.email,
                 bio: user?.bio,
                 location: user?.location,
                 website: user?.website,
@@ -405,14 +406,6 @@ const ProfileScreen = () => {
                     name='username'
                     label='Username'
                     placeholder='Username'
-                    flex_content
-                  />
-                  <MyTextField
-                    id='emaill'
-                    type='email'
-                    name='email'
-                    label='Email'
-                    placeholder='Email'
                     flex_content
                   />
                   <MyTextField
@@ -846,8 +839,14 @@ const ProfileScreen = () => {
               path={path}
               component={() => <DevAboutScreen profile={user && user} />}
             /> */}
-              <Route path={`about`} element={<></>} />
-              <Route path={`gh-profile`} element={<></>} />
+              <Route
+                path={`about`}
+                element={<DevAboutScreen profile={user} loading={loading} />}
+              />
+              <Route
+                path={`gh-profile`}
+                element={<GithubScreen username={user?.github} />}
+              />
               <Route path={`timeline`} element={<></>} />
               <Route path={`ques`} element={<></>} />
               <Route
