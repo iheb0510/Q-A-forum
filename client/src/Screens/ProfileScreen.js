@@ -45,13 +45,14 @@ const ProfileScreen = () => {
   }, [dispatch, userInfo?.user?._id]);
 
   useEffect(() => {
-    if (editModal) {
+    if (!editModal) {
       setCoverImage(baseURL + '/' + user?.cover);
       setPhotoImage(baseURL + '/' + user?.dp);
       setDp(null);
       setCover(null);
+      dispatch(getProfile(userInfo?.user?._id));
     }
-    dispatch(getProfile(userInfo?.user?._id));
+    
   }, [editModal]);
 
   const fieldValidationSchema = yup.object().shape({
@@ -178,7 +179,20 @@ const ProfileScreen = () => {
                   </button>
                 </div>
                 <div className='flex items-center'>
-                  <span className='text-gray-400'>@{user?.username}</span>
+                  <span className='text-gray-400 mr-4'>@{user?.username}</span>
+                  <span className='mr-4'>
+                  {user?.points && (
+                    <i className='mr-2 fas fa-star'></i>
+                  )}
+                  {user?.points}{" points"}
+                 </span>
+                 <span className='mr-4'>
+                  {user?.badge && (
+                    <i className='mr-2 fas fa-crown'></i>
+                  )}
+                  {user?.badge}
+                 </span>
+                  
                   {user?.workStatus !== 'off' && (
                     <div className='ml-2 flex justify-start items-center text-xs'>
                       <span className='w-3 h-3 rounded-full bg-green-400 mr-1'></span>

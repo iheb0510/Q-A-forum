@@ -10,3 +10,5 @@ export const ACTIVATE_ACCOUNT = 'ACTIVATE_ACCOUNT';
 export const GET_PROFILE = 'GET_PROFILE';
 export const EDIT_PROFILE = 'EDIT_PROFILE';
 export const SET_SUCCESS = 'SET_SUCCESS';
+export const GET_USERS = 'GET_USERS';
+export const GET_USER = 'GET_USER';

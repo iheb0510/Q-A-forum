@@ -110,12 +110,26 @@ router.put(
     }
   }
 );
-//@Route GET api/profile/
+
+//@Route GET api/profile/:id
 // @Description  Test route
 // @Access Public
 router.get('/:id', auth, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
+    res.json(user);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
+
+//@Route GET api/profile/:id
+// @Description  Test route
+// @Access Public
+router.get('/', auth, async (req, res) => {
+  try {
+    const user = await User.find( {_id:{$ne: req.user._id} }).select('-password');
     res.json(user);
   } catch (error) {
     console.error(error.message);

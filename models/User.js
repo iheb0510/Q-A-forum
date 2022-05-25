@@ -33,8 +33,7 @@ const EduSchema = mongoose.Schema({
 
 const ExperienceSchema = mongoose.Schema({
   role: {
-    type: Boolean,
-    default: false,
+    type: String,
   },
   company: {
     type: String,

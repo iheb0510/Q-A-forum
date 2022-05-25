@@ -7,6 +7,8 @@ import {
   CLEAR_ERROR,
   EDIT_PROFILE,
   SET_SUCCESS,
+  GET_USERS,
+  GET_USER,
 } from './types';
 
 export const getProfile = (id) => async (dispatch, getState) => {
@@ -29,6 +31,66 @@ export const getProfile = (id) => async (dispatch, getState) => {
 
     dispatch({
       type: GET_PROFILE,
+      payload: data,
+    });
+  } catch (err) {
+    dispatch({
+      type: SET_ERROR,
+      payload: err.response.data.msg,
+    });
+  }
+};
+
+export const getUser = (id) => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: SET_LOADING,
+    });
+    dispatch({
+      type: CLEAR_ERROR,
+    });
+    const {
+      auth: { userInfo },
+    } = getState();
+    const config = {
+      headers: {
+        'x-auth-token': `${userInfo.token}`,
+      },
+    };
+    const { data } = await axios.get(`${baseURL}/api/profile/${id}`, config);
+
+    dispatch({
+      type: GET_USER,
+      payload: data,
+    });
+  } catch (err) {
+    dispatch({
+      type: SET_ERROR,
+      payload: err.response.data.msg,
+    });
+  }
+};
+
+export const getUsers = () => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: SET_LOADING,
+    });
+    dispatch({
+      type: CLEAR_ERROR,
+    });
+    const {
+      auth: { userInfo },
+    } = getState();
+    const config = {
+      headers: {
+        'x-auth-token': `${userInfo.token}`,
+      },
+    };
+    const { data } = await axios.get(`${baseURL}/api/profile`, config);
+
+    dispatch({
+      type: GET_USERS,
       payload: data,
     });
   } catch (err) {

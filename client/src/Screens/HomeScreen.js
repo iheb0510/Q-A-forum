@@ -65,7 +65,7 @@ const HomeScreen = () => {
             <Route path={`communities`} element={<FindCommunityScreen />} />
             <Route path={`settings`} element={<SettingsScreen />} />
             <Route path={`profile/*`} element={<ProfileScreen />} />
-            <Route path={`user/:id`} element={<ProfileViewScreen />} />
+            <Route path={`user/:id/*`} element={<ProfileViewScreen />} />
             <Route path={`community/:id`} element={<CommunityViewScreen />} />
             <Route path='*' element={<Navigate to='/h/forum' replace />} />
           </Routes>

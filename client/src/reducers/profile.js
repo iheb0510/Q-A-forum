@@ -5,10 +5,14 @@ import {
   EDIT_PROFILE,
   CLEAR_ERROR,
   SET_SUCCESS,
+  GET_USERS,
+  GET_USER,
 } from '../actions/types';
 
 const initialState = {
   user: {},
+  users: [],
+  current: {},
   loading: false,
   error: null,
   Success: false,
@@ -21,7 +25,19 @@ export default (state = initialState, action) => {
       return {
         ...state,
         user: action.payload,
-        success:false,
+        success: false,
+        loading: false,
+      };
+    case GET_USERS:
+      return {
+        ...state,
+        users: action.payload,
+        loading: false,
+      };
+    case GET_USER:
+      return {
+        ...state,
+        current: action.payload,
         loading: false,
       };
     case EDIT_PROFILE:
