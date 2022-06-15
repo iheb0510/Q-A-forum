@@ -24,8 +24,12 @@ router.post(
     try {
       const user = await User.findById(req.user._id).select('-password');
       const newCommunity = new Community({
-        dp: req.files['dp'] && req.files['dp'][0].path,
-        cover: req.files['cover'] && req.files['cover'][0].path,
+        dp: req.files['dp']
+          ? req.files['dp'][0].path
+          : '/uploads/images/community.png',
+        cover: req.files['cover']
+          ? req.files['cover'][0].path
+          : '/uploads/images/cover.png',
         name,
         description,
         createdby: user,
@@ -59,8 +63,8 @@ router.put('/:id', [auth, upload], async (req, res) => {
     const user = await User.findById(req.user._id).select('-password');
     const newCommunity = new Community({
       _id: req.params.id,
-      dp: req.files['dp'] && req.files['dp'][0].path,
-      cover: req.files['cover'] && req.files['cover'][0].path,
+      dp: req.files['dp'] ? req.files['dp'][0].path : community.dp,
+      cover: req.files['cover'] ? req.files['cover'][0].path : community.cover,
       name,
       description,
       createdby: user,
@@ -72,7 +76,9 @@ router.put('/:id', [auth, upload], async (req, res) => {
       { _id: req.params.id },
       { $set: newCommunity },
       { new: true }
-    );
+    )
+      .populate('members')
+      .populate('createdby');
 
     res.json(community);
   } catch (error) {
@@ -87,9 +93,9 @@ router.put('/:id', [auth, upload], async (req, res) => {
 // @route     POST api/community/join
 // @desc      Add community
 // @access    private
-router.post(
+router.put(
   '/join/:id',
-  [auth],
+  auth,
 
   async (req, res) => {
     try {
@@ -104,6 +110,7 @@ router.post(
         return res.status(404).json({ message: 'Request already sent ' });
       }*/
       if (community.createdby.toString() === req.user._id) {
+        console.log(1);
         return res.status(404).json({ message: "it's your community " });
       }
       if (community.private === false) {
@@ -114,6 +121,7 @@ router.post(
         await user.save();
         await updatePoints(community.createdby.toString(), 3);
         await updatePoints(user._id, 1);
+        console.log(2);
       } else {
         const newRequest = new Request({
           sentby: user,
@@ -121,6 +129,7 @@ router.post(
           community,
         });
         await newRequest.save();
+        console.log(3);
       }
       res.json(community);
     } catch (error) {
@@ -136,7 +145,7 @@ router.post(
 // @route     POST api/community/accept
 // @desc      Accept request
 // @access    private
-router.post('/accept/:id', [auth], async (req, res) => {
+router.put('/accept/:id', [auth], async (req, res) => {
   try {
     /*const request = await Request.findOneAndUpdate(
       { _id: req.params.id },
@@ -158,7 +167,7 @@ router.post('/accept/:id', [auth], async (req, res) => {
     await user.communities.unshift(community);
     await user.save();
 
-    request.accepted = true;
+    request.status = 'accepted';
     await request.save();
     await updatePoints(community.createdby.toString(), 3);
     await updatePoints(user._id, 1);
@@ -175,7 +184,7 @@ router.post('/accept/:id', [auth], async (req, res) => {
 // @route     DELETE api/community/refuse
 // @desc      refuse request
 // @access    private
-router.delete('/refuse/:id', [auth], async (req, res) => {
+router.put('/refuse/:id', [auth], async (req, res) => {
   try {
     const request = await Request.findById(req.params.id);
     const community = await Community.findById(request.community.toString());
@@ -183,7 +192,8 @@ router.delete('/refuse/:id', [auth], async (req, res) => {
     if (community.createdby.toString() !== req.user._id) {
       return res.status(404).json({ message: "it's not your community " });
     }
-    request.remove();
+    request.status = 'refused';
+    await request.save();
     res.json(request);
   } catch (error) {
     console.error(error.message);
@@ -206,6 +216,14 @@ router.put('/delete/:id', [auth], async (req, res) => {
           communities: [],
         },
       }
+    );
+    await Community.updateMany(
+      {},
+      {
+        $set: {
+          members: [],
+        },
+      }
     );*/
     const community = await Community.findById(req.params.id);
     if (!community) {
@@ -224,7 +242,7 @@ router.put('/delete/:id', [auth], async (req, res) => {
       );
       await updatePoints(community.createdby.toString(), -20);
       await community.remove();
-      res.json(user);
+      res.json(community);
     }
   } catch (error) {
     console.error(error.message);
@@ -241,11 +259,12 @@ router.put('/delete/:id', [auth], async (req, res) => {
 router.get('/requests', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
-    const requests = await Request.find({ accepted: false, sendto: user }).sort(
-      {
+    const requests = await Request.find({ status: 'in_process', sendto: user })
+      .sort({
         createdAt: -1,
-      }
-    );
+      })
+      .populate('community')
+      .populate('sentby');
     res.json(requests);
   } catch (error) {
     console.error(error.message);
@@ -253,6 +272,22 @@ router.get('/requests', auth, async (req, res) => {
   }
 });
 
+//@Route GET api/community/requests
+// @Description  Test route
+// @Access private
+router.get('/requestsMe', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    const requests = await Request.find().sort({
+      createdAt: -1,
+    });
+    console.log(requests);
+    res.json(requests);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
 //@Route GET api/community/
 // @Description  Test route
 // @Access Public
@@ -276,6 +311,21 @@ router.get('/me', auth, async (req, res) => {
       _id: { $in: user.communities },
     });
     res.json(communities);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
+
+//@Route GET api/community/:id
+// @Description  Test route
+// @Access Public
+router.get('/:id', auth, async (req, res) => {
+  try {
+    const community = await Community.findById(req.params.id)
+      .populate('members')
+      .populate('createdby');
+    res.json(community);
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server error');

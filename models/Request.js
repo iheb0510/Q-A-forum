@@ -17,9 +17,9 @@ const Schema = mongoose.Schema(
       ref: 'community',
       required: true,
     },
-    accepted: {
-      type: Boolean,
-      default: false,
+    status: {
+      type: String,
+      default: 'in_process',
     },
   },
   {

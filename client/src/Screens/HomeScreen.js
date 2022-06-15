@@ -8,6 +8,7 @@ import FindPeopleScreen from './FindPeopleScreen';
 import SettingsScreen from './SettingsScreen';
 import FindCommunityScreen from './FindCommunityScreen';
 import CommunityViewScreen from './CommunityViewScreen';
+import RequestsScreen from './RequestsScreen';
 
 const HomeScreen = () => {
   const location = useLocation();
@@ -51,6 +52,12 @@ const HomeScreen = () => {
               <SidebarMenu fontAwesome='fas fa-cog' text={'Settings'} />
             </Link>
             <Link
+              to={`/h/requests`}
+              className={pathName === 'requests' ? 'text-indigo-600' : ''}
+            >
+              <SidebarMenu fontAwesome='fas fa-cog' text={'Requests'} />
+            </Link>
+            <Link
               to={`/h/profile`}
               className={pathName === 'profile' ? 'text-indigo-600' : ''}
             >
@@ -63,10 +70,11 @@ const HomeScreen = () => {
             <Route path={`forum`} element={<AskQuestionsScreen />} />
             <Route path={`people`} element={<FindPeopleScreen />} />
             <Route path={`communities`} element={<FindCommunityScreen />} />
+            <Route path={`requests`} element={<RequestsScreen/>} />
             <Route path={`settings`} element={<SettingsScreen />} />
             <Route path={`profile/*`} element={<ProfileScreen />} />
             <Route path={`user/:id/*`} element={<ProfileViewScreen />} />
-            <Route path={`community/:id`} element={<CommunityViewScreen />} />
+            <Route path={`community/:id/*`} element={<CommunityViewScreen />} />
             <Route path='*' element={<Navigate to='/h/forum' replace />} />
           </Routes>
         </div>

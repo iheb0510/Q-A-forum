@@ -129,7 +129,9 @@ router.get('/:id', auth, async (req, res) => {
 // @Access Public
 router.get('/', auth, async (req, res) => {
   try {
-    const user = await User.find( {_id:{$ne: req.user._id} }).select('-password');
+    const user = await User.find({ _id: { $ne: req.user._id } }).select(
+      '-password'
+    );
     res.json(user);
   } catch (error) {
     console.error(error.message);
