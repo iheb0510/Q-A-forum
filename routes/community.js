@@ -26,10 +26,10 @@ router.post(
       const newCommunity = new Community({
         dp: req.files['dp']
           ? req.files['dp'][0].path
-          : '/uploads/images/community.png',
+          : 'uploads/images/community.jpg',
         cover: req.files['cover']
           ? req.files['cover'][0].path
-          : '/uploads/images/cover.png',
+          : 'uploads/images/cover.png',
         name,
         description,
         createdby: user,
@@ -40,6 +40,7 @@ router.post(
       user.communities.unshift(community);
       await user.save();
       await updatePoints(user._id, 5);
+      console.log('com', community);
       res.json(community);
     } catch (error) {
       console.error(error.message);
@@ -131,7 +132,10 @@ router.put(
         await newRequest.save();
         console.log(3);
       }
-      res.json(community);
+      const requests = await Request.find().sort({
+        createdAt: -1,
+      });
+      res.json(community, requests);
     } catch (error) {
       console.error(error.message);
       if (error.kind === 'ObjectId') {
@@ -181,7 +185,7 @@ router.put('/accept/:id', [auth], async (req, res) => {
   }
 });
 
-// @route     DELETE api/community/refuse
+// @route     Put api/community/refuse
 // @desc      refuse request
 // @access    private
 router.put('/refuse/:id', [auth], async (req, res) => {
@@ -204,7 +208,7 @@ router.put('/refuse/:id', [auth], async (req, res) => {
   }
 });
 
-// @route     DELETE api/community/delete/:id
+// @route     Put api/community/delete/:id
 // @desc      delete community
 // @access    private
 router.put('/delete/:id', [auth], async (req, res) => {
@@ -293,7 +297,9 @@ router.get('/requestsMe', auth, async (req, res) => {
 // @Access Public
 router.get('/', async (req, res) => {
   try {
-    const communities = await Community.find();
+    const communities = await Community.find()
+      .populate('members')
+      .populate('createdby');
     res.json(communities);
   } catch (error) {
     console.error(error.message);

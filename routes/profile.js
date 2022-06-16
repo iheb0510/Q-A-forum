@@ -116,7 +116,11 @@ router.put(
 // @Access Public
 router.get('/:id', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password');
+    const user = await User.findById(req.params.id)
+      .populate({ path: 'communities', populate: { path: 'members' } })
+      .populate({ path: 'communities', populate: { path: 'createdby' } })
+      .select('-password');
+    console.log('con', user);
     res.json(user);
   } catch (error) {
     console.error(error.message);
@@ -129,9 +133,11 @@ router.get('/:id', auth, async (req, res) => {
 // @Access Public
 router.get('/', auth, async (req, res) => {
   try {
-    const user = await User.find({ _id: { $ne: req.user._id } }).select(
-      '-password'
-    );
+    const user = await User.find({ _id: { $ne: req.user._id } })
+      .populate({ path: 'communities', populate: { path: 'members' } })
+      .populate({ path: 'communities', populate: { path: 'createdby' } })
+      .select('-password');
+
     res.json(user);
   } catch (error) {
     console.error(error.message);

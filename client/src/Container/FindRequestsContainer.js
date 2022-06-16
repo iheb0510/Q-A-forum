@@ -41,16 +41,18 @@ const FindRequestsContainer = () => {
           />
         </div>
         <div>
-          {error && (
-            <Alert fail msg={error} />
-          )} 
-          {requestsList?.length > 0 ? (
+        {loading ? (
+          <Loader />
+        ) :<>{error && (
+          <Alert fail msg={error} />
+        )} 
+        {requestsList?.length > 0 ? (
             requestsList
               ?.sort((a, b) => (a?.name > b?.name ? 1 : -1))
               ?.map((request) =>  <Request key={request?._id} request={request} />)
           ) : (
             <Alert msg='No Requests!' />
-          )}
+          )}</>}
         </div>
       </div>
     );

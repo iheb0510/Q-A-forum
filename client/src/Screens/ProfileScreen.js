@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { editProfile, getProfile } from '../actions/profile';
-
+import { getRequests } from '../actions/community';
 import axios from 'axios';
 import GithubScreen from './GithubScreen';
 import Alert from '../Components/Alert';
+import Community from '../Components/Community';
 import baseURL from '../baseURL';
 import Modal from '../Components/Modal';
 import Loader from '../Components/Loader';
@@ -21,8 +22,7 @@ const ProfileScreen = () => {
   const currentPath = location.pathname.split('/')[3];
 
   const [editModal, setEditModal] = useState(false);
-  const [followerModal, setFollowerModal] = useState(false);
-  const [followingModal, setFollowingModal] = useState(false);
+  const [communityModal, setcommunityModal] = useState(false);
 
   const signIn = useSelector((state) => state.auth);
   const { userInfo } = signIn;
@@ -38,6 +38,7 @@ const ProfileScreen = () => {
   useEffect(() => {
     const fetch = () => {
       dispatch(getProfile(userInfo?.user?._id));
+      dispatch(getRequests());
       console.log(userInfo?.user?._id);
     };
 
@@ -52,7 +53,6 @@ const ProfileScreen = () => {
       setCover(null);
       dispatch(getProfile(userInfo?.user?._id));
     }
-    
   }, [editModal]);
 
   const fieldValidationSchema = yup.object().shape({
@@ -181,18 +181,15 @@ const ProfileScreen = () => {
                 <div className='flex items-center'>
                   <span className='text-gray-400 mr-4'>@{user?.username}</span>
                   <span className='mr-4'>
-                  {user?.points && (
-                    <i className='mr-2 fas fa-star'></i>
-                  )}
-                  {user?.points}{" points"}
-                 </span>
-                 <span className='mr-4'>
-                  {user?.badge && (
-                    <i className='mr-2 fas fa-crown'></i>
-                  )}
-                  {user?.badge}
-                 </span>
-                  
+                    {user?.points && <i className='mr-2 fas fa-star'></i>}
+                    {user?.points}
+                    {' points'}
+                  </span>
+                  <span className='mr-4'>
+                    {user?.badge && <i className='mr-2 fas fa-crown'></i>}
+                    {user?.badge}
+                  </span>
+
                   {user?.workStatus !== 'off' && (
                     <div className='ml-2 flex justify-start items-center text-xs'>
                       <span className='w-3 h-3 rounded-full bg-green-400 mr-1'></span>
@@ -223,16 +220,10 @@ const ProfileScreen = () => {
                 <div className='flex items-center space-x-2'>
                   <i className='fas fa-users mr-1'></i>
                   <button
-                    onClick={() => setFollowerModal(true)}
+                    onClick={() => setcommunityModal(true)}
                     className='focus:outline-none hover:text-indigo-500'
                   >
-                    {user?.followers?.length} Followers
-                  </button>
-                  <button
-                    onClick={() => setFollowingModal(true)}
-                    className='focus:outline-none hover:text-indigo-500'
-                  >
-                    {user?.following?.length} Following
+                    {user?.communities?.length} Communities
                   </button>
                 </div>
                 <div className='flex items-center '>
@@ -831,21 +822,20 @@ const ProfileScreen = () => {
             </Formik>
           </Modal>
           <Modal
-            modalOpen={followerModal}
-            setModalOpen={setFollowerModal}
-            title={`Followers (${
-              user?.followers ? user?.followers?.length : '0'
+            modalOpen={communityModal}
+            setModalOpen={setcommunityModal}
+            title={`Communities (${
+              user?.communities ? user?.communities?.length : '0'
             })`}
             titleIcon='fas fa-users'
-          ></Modal>
-          <Modal
-            modalOpen={followingModal}
-            setModalOpen={setFollowingModal}
-            title={`Following (${
-              user?.following ? user?.following?.length : '0'
-            })`}
-            titleIcon='fas fa-users'
-          ></Modal>
+          >
+            {user?.communities?.map((u, idx) => (
+              <>
+                <Community key={idx} community={u} />
+              </>
+            ))}
+          </Modal>
+
           <div className='question_article_feed p-2 bg-white dark:bg-gray-800 w-full'>
             <Routes>
               {/* <Route

@@ -14,7 +14,13 @@ import GithubScreen from './GithubScreen';
 import Alert from '../Components/Alert';
 import baseURL from '../baseURL';
 import DevAboutScreen from './DevAboutScreen';
-import { editCommunity, getCommunity } from '../actions/community';
+import {
+  editCommunity,
+  getCommunity,
+  getRequests,
+  joinCommunity,
+  getAllCommunities
+} from '../actions/community';
 import User from '../Components/User';
 import Modal from '../Components/Modal';
 import { Field, FieldArray, Formik } from 'formik';
@@ -38,7 +44,9 @@ const CommunityViewScreen = () => {
   const { user } = devProfile;
 
   const communityInfo = useSelector((state) => state.community);
-  const { loading, error, community } = communityInfo;
+  const { loading, error, communities, requests } = communityInfo;
+
+  const community = communities?.filter((community) => community._id == id)[0];
 
   const [dp, setDp] = useState(community?.dp);
   const [cover, setCover] = useState(community?.cover);
@@ -48,12 +56,17 @@ const CommunityViewScreen = () => {
   const [photoImage, setPhotoImage] = useState(baseURL + '/' + community?.dp);
 
   useEffect(() => {
-    const fetch = () => {
-      dispatch(getCommunity(id));
-    };
+    dispatch(getRequests());
+    dispatch(getAllCommunities());
+  }, []);
 
-    return fetch;
-  }, [dispatch, id]);
+  
+
+  const joinHandler = () => {
+    if (community) {
+      dispatch(joinCommunity(community?._id));
+    }
+  };
 
   useEffect(() => {
     if (!editModal) {
@@ -73,7 +86,8 @@ const CommunityViewScreen = () => {
     description: yup
       .string()
       .max(150, 'Max 150 charecters')
-      .min(5, 'Min 5 charecter'),
+      .min(5, 'Min 5 charecter')
+      .required('Required!'),
   });
 
   const uploadDpFileHandler = (e) => {
@@ -138,15 +152,36 @@ const CommunityViewScreen = () => {
               <div className='name_address_location text-gray-500 dark:text-gray-300 text-sm'>
                 <div className='flex items-center justify-between'>
                   <h4 className='text-2xl font-extrabold'>{community?.name}</h4>
-                  {user?._id == community?.createdby?._id ? (
+
+                  {community?.members?.filter((u) => u._id === user._id)
+                    .length <= 0 ? (
+                    requests?.filter(
+                      (u) =>
+                        u.sentby === user._id && u.community === community?._id
+                    ).length > 0 ? (
+                      <div className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600 disabled'>
+                        Request already sent
+                      </div>
+                    ) : (
+                      <button
+                        onClick={joinHandler}
+                        className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600'
+                      >
+                        <i className='fas fa-user-minus mr-1'></i>
+                        Join
+                      </button>
+                    )
+                  ) : community?.createdby?._id !== user._id ? (
+                    <div className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600 disabled'>
+                      Joined
+                    </div>
+                  ) : (
                     <button
                       onClick={() => setEditModal(!editModal)}
                       className='border border-indigo-500 font-semibold bg-indigo-500 focus:outline-none px-2 py-1 text-sm hover:bg-indigo-600 text-white rounded'
                     >
                       <i className='fas fa-edit mr-1'></i>Edit Community
                     </button>
-                  ) : (
-                    <></>
                   )}
                 </div>
                 <div className='flex items-center'>
@@ -202,7 +237,7 @@ const CommunityViewScreen = () => {
           <Modal
             modalOpen={editModal}
             setModalOpen={setEditModal}
-            title='Edit Profile'
+            title='Edit Community'
             titleIcon='fas fa-edit'
             large
           >

@@ -52,12 +52,6 @@ const ExperienceSchema = mongoose.Schema({
     type: String,
   },
 });
-const communitySchema = new mongoose.Schema({
-  community: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'community',
-  },
-});
 
 const UserSchema = mongoose.Schema(
   {
@@ -115,7 +109,12 @@ const UserSchema = mongoose.Schema(
     googleId: { type: String },
     twitterId: { type: String },
     githubId: { type: String },
-    communities: [communitySchema],
+    communities: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'community',
+      },
+    ],
     badge: {
       type: String,
       default: 'Beginner',

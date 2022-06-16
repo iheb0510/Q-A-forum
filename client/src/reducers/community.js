@@ -63,8 +63,9 @@ export default (state = initialState, action) => {
         ...state,
         loading: false,
         communities: state.communities.map((community) =>
-          community._id === action.payload._id ? community : action.payload
+          community._id === action.payload.community._id ? action.payload.community : community 
         ),
+        requests : action.payload.requests
       };
     case ADD_COMMUNITY:
       return {
@@ -84,7 +85,7 @@ export default (state = initialState, action) => {
       return {
         ...state,
         communities: state.communities.map((community) =>
-          community._id === action.payload._id ? community : action.payload
+          community._id === action.payload._id ? action.payload : community
         ),
 
         community: action.payload,

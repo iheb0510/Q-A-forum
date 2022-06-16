@@ -69,7 +69,7 @@ const HomeScreen = () => {
           <Routes>
             <Route path={`forum`} element={<AskQuestionsScreen />} />
             <Route path={`people`} element={<FindPeopleScreen />} />
-            <Route path={`communities`} element={<FindCommunityScreen />} />
+            <Route path={`communities/*`} element={<FindCommunityScreen />} />
             <Route path={`requests`} element={<RequestsScreen/>} />
             <Route path={`settings`} element={<SettingsScreen />} />
             <Route path={`profile/*`} element={<ProfileScreen />} />

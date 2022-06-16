@@ -12,7 +12,7 @@ function Community({ community }) {
   const { error, user } = devProfile;
   const devvom = useSelector((state) => state.community);
   const { loading, requests } = devvom;
-
+  
   const joinHandler = () => {
     if (community) {
       dispatch(joinCommunity(community?._id));
@@ -44,26 +44,30 @@ function Community({ community }) {
         </div>
       </div>
       <div>
-        {community?.members?.filter((u) => u === user._id).length <= 0 ? (
+        {community?.members?.filter((u) => u._id === user._id).length <= 0 ? (
           requests?.filter(
             (u) => u.sentby === user._id && u.community === community?._id
           ).length > 0 ? (
-            <button className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600'>
+            <div className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600 disabled'>
               Request already sent
-            </button>
+            </div>
           ) : (
             <button
               onClick={joinHandler}
               className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600'
             >
               <i className='fas fa-user-minus mr-1'></i>
-              Join     
+              Join
             </button>
           )
-        ) : (
-          <button className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600'>
+        ) : community?.createdby?._id !== user._id ? (
+          <div className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600 disabled'>
             Joined
-          </button>
+          </div>
+        ) : (
+          <div className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600 disabled'>
+            yours
+          </div>
         )}
       </div>
     </div>

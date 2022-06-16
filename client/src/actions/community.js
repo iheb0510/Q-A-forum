@@ -61,10 +61,11 @@ export const addCommunity = (dp, cover, data) => async (dispatch, getState) => {
         'x-auth-token': `${userInfo.token}`,
       },
     };
-    await axios.post(`${baseURL}/api/community`, formData, config);
-
+    const res = await axios.post(`${baseURL}/api/community`, formData, config);
+    Promise.all(console.log('response', res.data));
     dispatch({
       type: ADD_COMMUNITY,
+      payload: res.data,
     });
   } catch (err) {
     dispatch({
