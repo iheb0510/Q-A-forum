@@ -8,7 +8,7 @@ const authAdmin = require('../middleware/authAdmin');
 const { check, validationResult } = require('express-validator');
 
 const User = require('../models/User');
-const Question = require('../models/question');
+const Question = require('../models/Question');
 const Community = require('../models/Community');
 const Answer = require('../models/Answer');
 const Tag = require('../models/Tag');
@@ -36,7 +36,11 @@ router.get('/', [auth], async (req, res) => {
     const user = await User.findById(req.user._id).select('-password');
     const questions = await Question.find({
       community: { $in: user.communities },
-    });
+    })
+      .populate({ path: 'tags', populate: { path: '_id' } })
+      .populate('user')
+      .populate('community');
+    
     res.json(questions);
   } catch (err) {
     console.error(err.message);
@@ -47,12 +51,16 @@ router.get('/', [auth], async (req, res) => {
 // @route     GET api/questions
 // @desc      Get my questions
 // @access    Private
-router.get('/me', [auth], async (req, res) => {
+router.get('/q/me', [auth], async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
     const questions = await Question.find({
       user: req.user._id,
-    });
+    })
+      .populate({ path: 'tags', populate: { path: '_id' } })
+      .populate('user')
+      .populate('community');
+    
     res.json(questions);
   } catch (err) {
     console.error(err.message);
@@ -66,7 +74,8 @@ router.get('/me', [auth], async (req, res) => {
 router.post(
   '/',
   [auth],
-  check('question', 'question is required').exists(),
+  check('title', 'title is required').exists(),
+  check('description', 'description is required').exists(),
   check('tags', 'tags is required').exists(),
   check('communityId', 'community is required').exists(),
   async (req, res) => {
@@ -75,14 +84,15 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { question, tags, communityId } = req.body;
+    const { title, description, tags, communityId } = req.body;
 
     try {
       const community = await Community.findById(communityId);
       const user = await User.findById(req.user._id).select('-password');
       const newQuestion = new Question({
         user,
-        question,
+        title,
+        description,
         community,
       });
       const quest = await newQuestion.save();
@@ -113,7 +123,11 @@ router.post(
         { new: true }
       );
       await updatePoints(user._id, 2);
-      res.json(quested);
+      const q = await Question.findById(quested._id)
+        .populate({ path: 'tags', populate: { path: '_id' } })
+        .populate('user')
+        .populate('community');
+      res.json(q);
     } catch (err) {
       console.error(err.message);
       res.status(500).send('Server Error');
@@ -121,13 +135,14 @@ router.post(
   }
 );
 
-// @route     POST api/question/:id
+// @route     Put api/question/:id
 // @desc      update Question
 // @access    Private
 router.put(
   '/:id',
   [auth],
-  check('question', 'question is required').exists(),
+  check('title', 'title is required').exists(),
+  check('description', 'description is required').exists(),
   check('tags', 'tags is required').exists(),
   check('communityId', 'community is required').exists(),
   async (req, res) => {
@@ -136,23 +151,24 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { question, tags, communityId } = req.body;
+    const { title, description, tags, communityId } = req.body;
 
     try {
+      console.log('sq', tags);
       const community = await Community.findById(communityId);
       const user = await User.findById(req.user._id).select('-password');
-      const question = await question.findById(req.params.id);
+      const question = await Question.findById(req.params.id);
 
       await Promise.all(
         question.tags.map(async (value) => {
-          let tag = await Tag.find({ _id: value });
+          let tag = await Tag.find({ name: value });
           if (tag.length > 1) {
             await Tag.findOneAndUpdate(
               { name: value },
               { $inc: { count: -1 }, $pull: { questions: { question } } }
             );
           } else {
-            await tag.remove();
+            await Tag.findByIdAndDelete({ _id: value });
           }
         })
       );
@@ -162,11 +178,11 @@ router.put(
           if (tag.length !== 0) {
             await Tag.findOneAndUpdate(
               { name: value },
-              { $inc: { count: 1 }, $push: { questions: quest } }
+              { $inc: { count: 1 }, $push: { questions: question } }
             );
           } else {
             let questions = new Array();
-            questions.unshift(quest);
+            questions.unshift(question);
             let newTag = new Tag({
               name: value,
               questions,
@@ -178,16 +194,21 @@ router.put(
       const Qtags = await Tag.find({ name: { $in: tags } });
       console.log('Qtags', Qtags);
       const newQuestion = new Question({
+        _id: question._id,
         user,
-        question,
+        title,
+        description,
         community,
         tags: Qtags,
       });
       const quested = await Question.findOneAndUpdate(
-        { _id: quest._id },
+        { _id: question._id },
         { $set: newQuestion },
         { new: true }
-      );
+      )
+        .populate({ path: 'tags', populate: { path: '_id' } })
+        .populate('user')
+        .populate('community');
       res.json(quested);
     } catch (err) {
       console.error(err.message);
@@ -269,7 +290,7 @@ router.put('/upvote/:id', auth, async (req, res) => {
       }
     }
     await question.save();
-    res.json(question.upvotes);
+    res.json({ upvotes: question.upvotes, downvotes: question.downvotes });
   } catch (error) {
     console.error(error.message);
     if (error.kind === 'ObjectId') {
@@ -308,7 +329,7 @@ router.put('/downvote/:id', auth, async (req, res) => {
       }
     }
     await question.save();
-    res.json(question.downvotes);
+    res.json({ upvotes: question.upvotes, downvotes: question.downvotes });
   } catch (error) {
     console.error(error.message);
     if (error.kind === 'ObjectId') {

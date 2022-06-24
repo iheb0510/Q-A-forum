@@ -19,7 +19,7 @@ const AnswerSchema = new mongoose.Schema(
       ref: 'question',
       required: true,
     },
-    answer: {
+    ansDesc: {
       type: String,
       required: true,
     },

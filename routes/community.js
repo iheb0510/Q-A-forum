@@ -106,7 +106,7 @@ router.put(
       const alreadysent = requ.filter(
         (requete) => requete.community.toString() === req.params.id
       );
-      console.log(alreadysent.length);
+      
       /*  if (alreadysent.length > 0) {
         return res.status(404).json({ message: 'Request already sent ' });
       }*/
@@ -135,7 +135,7 @@ router.put(
       const requests = await Request.find().sort({
         createdAt: -1,
       });
-      res.json(community, requests);
+      res.json({ community: community, requests: requests });
     } catch (error) {
       console.error(error.message);
       if (error.kind === 'ObjectId') {
@@ -285,7 +285,7 @@ router.get('/requestsMe', auth, async (req, res) => {
     const requests = await Request.find().sort({
       createdAt: -1,
     });
-    console.log(requests);
+    
     res.json(requests);
   } catch (error) {
     console.error(error.message);
@@ -315,7 +315,11 @@ router.get('/me', auth, async (req, res) => {
     const user = await User.findById(req.user._id).select('-password');
     const communities = await Community.find({
       _id: { $in: user.communities },
-    });
+    })
+      .populate('members')
+      .populate('createdby');
+
+    
     res.json(communities);
   } catch (error) {
     console.error(error.message);

@@ -67,7 +67,7 @@ const HomeScreen = () => {
         </div>
         <div className='col-span-4 bg-gray-50 dark:bg-gray-900 w-full h-full'>
           <Routes>
-            <Route path={`forum`} element={<AskQuestionsScreen />} />
+            <Route path={`forum/*`} element={<AskQuestionsScreen />} />
             <Route path={`people`} element={<FindPeopleScreen />} />
             <Route path={`communities/*`} element={<FindCommunityScreen />} />
             <Route path={`requests`} element={<RequestsScreen/>} />

@@ -8,7 +8,7 @@ const authAdmin = require('../middleware/authAdmin');
 const { check, validationResult } = require('express-validator');
 
 const User = require('../models/User');
-const Question = require('../models/question');
+const Question = require('../models/Question');
 const Community = require('../models/Community');
 const Answer = require('../models/Answer');
 const Tag = require('../models/Tag');
@@ -22,7 +22,7 @@ router.post(
   [
     auth,
     [
-      check('answer', 'answer is required ').not().isEmpty(),
+      check('ansDesc', 'answer is required ').not().isEmpty(),
       check('questionId', 'questionId is required').not().isEmpty(),
     ],
   ],
@@ -32,7 +32,7 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const { answer, questionId } = req.body;
+    const { ansDesc, questionId } = req.body;
     try {
       const user = await User.findById(req.user._id).select('-password');
       const question = await Question.findById(questionId);
@@ -40,11 +40,16 @@ router.post(
       const newAnswer = new Answer({
         user,
         question,
-        answer,
+        ansDesc,
       });
       const response = await newAnswer.save();
       await updatePoints(user._id, -2);
-      res.json(response);
+      const a = await Answer.findById(response._id)
+        .populate('user')
+        .populate('question')
+        .populate({ path: 'comments', populate: { path: 'user' } });
+      console.log('ppp', a);
+      res.json(a);
     } catch (error) {
       console.error(error.message);
       res.status(500).send('Server error');
@@ -60,7 +65,7 @@ router.put(
   [
     auth,
     [
-      check('answer', 'answer is required ').not().isEmpty(),
+      check('ansDesc', 'answer is required ').not().isEmpty(),
       check('questionId', 'questionId is required').not().isEmpty(),
     ],
   ],
@@ -70,7 +75,7 @@ router.put(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const { answer, questionId } = req.body;
+    const { ansDesc, questionId } = req.body;
     try {
       const user = await User.findById(req.user._id).select('-password');
       const question = await Question.findById(questionId);
@@ -79,13 +84,16 @@ router.put(
         _id: req.params.id,
         user,
         question,
-        answer,
+        ansDesc,
       });
       const response = await Answer.findOneAndUpdate(
         { _id: req.params.id },
         { $set: newAnswer },
         { new: true }
-      );
+      )
+        .populate('question')
+        .populate('user')
+        .populate({ path: 'comments', populate: { path: 'user' } });
       res.json(response);
     } catch (error) {
       console.error(error.message);
@@ -126,6 +134,21 @@ router.get('/:id', [auth], async (req, res) => {
   try {
     const question = await Question.findById(req.params.id);
     const answers = await Answer.find({ question: question });
+    res.json(answers);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+// @route     GET api/answer/:id
+// @desc      Get answers by question
+// @access    Private
+router.get('/', [auth], async (req, res) => {
+  try {
+    const answers = await Answer.find()
+      .populate('question')
+      .populate('user')
+      .populate({ path: 'comments', populate: { path: 'user' } });
     res.json(answers);
   } catch (err) {
     console.error(err.message);
@@ -224,7 +247,7 @@ router.put('/solved/:id', auth, async (req, res) => {
     );
     await updatePoints(answer.user, 10);
     await updatePoints(question.user, 5);
-    res.json(question);
+    res.json({ question: question, solution: answer.solution });
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server error');
@@ -253,7 +276,11 @@ router.put(
 
       answer.comments.unshift(newComment);
       await answer.save();
-      res.json(answer.comments);
+      const ans = await Answer.findById(req.params.id).populate({
+        path: 'comments',
+        populate: { path: 'user' },
+      });
+      res.json(ans.comments);
     } catch (error) {
       console.error(error.message);
       if (error.kind === 'ObjectId') {
@@ -279,7 +306,11 @@ router.put('/comment/delete/:id/:id_com', auth, async (req, res) => {
     if (removeIndex !== -1) {
       answer.comments.splice(removeIndex, 1);
       await answer.save();
-      res.json(answer.comments);
+      const ans = await Answer.findById(req.params.id).populate({
+        path: 'comments',
+        populate: { path: 'user' },
+      });
+      res.json(ans.comments);
     }
   } catch (error) {
     console.error(error.message);
@@ -317,7 +348,11 @@ router.put(
 
       answer.comments[updateIndex] = newComment;
       await answer.save();
-      res.json(answer);
+      const ans = await Answer.findById(req.params.id).populate({
+        path: 'comments',
+        populate: { path: 'user' },
+      });
+      res.json(ans.comments);
     } catch (error) {
       console.error(error.message);
       if (error.kind === 'ObjectId') {

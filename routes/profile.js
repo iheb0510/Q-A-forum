@@ -120,7 +120,7 @@ router.get('/:id', auth, async (req, res) => {
       .populate({ path: 'communities', populate: { path: 'members' } })
       .populate({ path: 'communities', populate: { path: 'createdby' } })
       .select('-password');
-    console.log('con', user);
+    
     res.json(user);
   } catch (error) {
     console.error(error.message);

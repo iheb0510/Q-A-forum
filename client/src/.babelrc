@@ -1,0 +1,16 @@
+{
+    "plugins": [
+      ["prismjs", {
+          "languages": [
+            "applescript",
+            "css",
+            "javascript",
+            "markup",
+            "scss"
+          ],
+          "plugins": ["line-numbers"],
+          "theme": "twilight",
+          "css": true
+      }]
+    ]
+  }

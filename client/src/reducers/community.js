@@ -3,6 +3,7 @@ import {
   SET_ERROR,
   CLEAR_ERROR,
   GET_ALL_COMMUNITIES,
+  GET_ALL_MY_COMMUNITIES,
   ADD_COMMUNITY,
   EDIT_COMMUNITY,
   DELETE_COMMUNITY,
@@ -25,6 +26,12 @@ const initialState = {
 export default (state = initialState, action) => {
   switch (action.type) {
     case GET_ALL_COMMUNITIES:
+      return {
+        ...state,
+        communities: action.payload,
+        loading: false,
+      };
+    case GET_ALL_MY_COMMUNITIES:
       return {
         ...state,
         communities: action.payload,
@@ -63,9 +70,11 @@ export default (state = initialState, action) => {
         ...state,
         loading: false,
         communities: state.communities.map((community) =>
-          community._id === action.payload.community._id ? action.payload.community : community 
+          community._id === action.payload.id
+            ? action.payload.community
+            : community
         ),
-        requests : action.payload.requests
+        requests: action.payload.requests,
       };
     case ADD_COMMUNITY:
       return {

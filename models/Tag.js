@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
 
-const Schema = mongoose.Schema(
+const TagSchema = mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
     },
     count: {
       type: Number,
@@ -22,4 +21,4 @@ const Schema = mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('tag', Schema);
+module.exports = mongoose.model('tag', TagSchema);

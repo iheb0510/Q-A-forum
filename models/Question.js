@@ -7,18 +7,23 @@ const voteSchema = new mongoose.Schema({
   },
 });
 
-const Schema = mongoose.Schema(
+const QuestionSchema = mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'user',
     },
-    question: {
+    title: {
       type: String,
       required: true,
     },
-    tags: [
-      {
+
+    description: {
+      type: String,
+      required: true,
+    },
+
+    tags: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'tag',
       },
@@ -41,4 +46,4 @@ const Schema = mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('question', Schema);
+module.exports = mongoose.model('question', QuestionSchema);

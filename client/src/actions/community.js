@@ -5,6 +5,7 @@ import {
   SET_ERROR,
   CLEAR_ERROR,
   GET_ALL_COMMUNITIES,
+  GET_ALL_MY_COMMUNITIES,
   ADD_COMMUNITY,
   EDIT_COMMUNITY,
   GET_COMMUNITY,
@@ -28,6 +29,29 @@ export const getAllCommunities = () => async (dispatch) => {
 
     dispatch({
       type: GET_ALL_COMMUNITIES,
+      payload: data,
+    });
+  } catch (err) {
+    dispatch({
+      type: SET_ERROR,
+      payload: err.response.data.msg,
+    });
+  }
+};
+
+export const getAllMyCommunities = () => async (dispatch) => {
+  try {
+    dispatch({
+      type: SET_LOADING,
+    });
+    dispatch({
+      type: CLEAR_ERROR,
+    });
+
+    const { data } = await axios.get(`${baseURL}/api/community/me`);
+
+    dispatch({
+      type: GET_ALL_MY_COMMUNITIES,
       payload: data,
     });
   } catch (err) {
@@ -134,11 +158,13 @@ export const joinCommunity = (id) => async (dispatch, getState) => {
         'x-auth-token': `${userInfo.token}`,
       },
     };
-    await axios.put(`${baseURL}/api/community/join/${id}`, {}, config);
-    dispatch(getRequests());
-    setTimeout(() => {
-      dispatch(getAllCommunities());
-    }, 1000);
+    const {data} =await axios.put(`${baseURL}/api/community/join/${id}`, {}, config);
+
+    dispatch({
+      type: JOIN_COMMUNITY,
+      payload: { id, community: data.community,requests: data.requests },
+    });
+    
   } catch (err) {
     dispatch({
       type: SET_ERROR,
