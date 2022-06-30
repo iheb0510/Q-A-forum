@@ -15,6 +15,7 @@ import { Field, FieldArray, Formik } from 'formik';
 import MyTextField from '../Components/MyTextField';
 import * as yup from 'yup';
 import DevAboutScreen from './DevAboutScreen';
+import ProfileQuestionScreen from './ProfileQuestionScreen';
 
 const ProfileScreen = () => {
   const dispatch = useDispatch();
@@ -852,7 +853,7 @@ const ProfileScreen = () => {
                 element={<GithubScreen username={user?.github} />}
               />
               <Route path={`timeline`} element={<></>} />
-              <Route path={`ques`} element={<></>} />
+              <Route path={`ques`} element={<ProfileQuestionScreen id={user._id} />} />
               <Route
                 path='*'
                 element={<Navigate to={'/h/profile/about'} replace />}

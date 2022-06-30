@@ -20,7 +20,10 @@ const updatePoints = require('../utils/updatePoints');
 router.get('/:id', [auth], async (req, res) => {
   try {
     const commmunity = await Community.findById(req.params.id);
-    const questions = await Question.find({ community: commmunity });
+    const questions = await Question.find({ community: commmunity })
+      .populate({ path: 'tags', populate: { path: '_id' } })
+      .populate('user')
+      .populate('community');
     res.json(questions);
   } catch (err) {
     console.error(err.message);
@@ -40,7 +43,7 @@ router.get('/', [auth], async (req, res) => {
       .populate({ path: 'tags', populate: { path: '_id' } })
       .populate('user')
       .populate('community');
-    
+
     res.json(questions);
   } catch (err) {
     console.error(err.message);
@@ -51,16 +54,16 @@ router.get('/', [auth], async (req, res) => {
 // @route     GET api/questions
 // @desc      Get my questions
 // @access    Private
-router.get('/q/me', [auth], async (req, res) => {
+router.get('/user/:id', [auth], async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
     const questions = await Question.find({
-      user: req.user._id,
+      user: req.params.id,
     })
       .populate({ path: 'tags', populate: { path: '_id' } })
       .populate('user')
       .populate('community');
-    
+
     res.json(questions);
   } catch (err) {
     console.error(err.message);
@@ -157,15 +160,19 @@ router.put(
       console.log('sq', tags);
       const community = await Community.findById(communityId);
       const user = await User.findById(req.user._id).select('-password');
-      const question = await Question.findById(req.params.id);
+      const question = await Question.findById(req.params.id)
 
       await Promise.all(
+        
         question.tags.map(async (value) => {
-          let tag = await Tag.find({ name: value });
-          if (tag.length > 1) {
-            await Tag.findOneAndUpdate(
-              { name: value },
-              { $inc: { count: -1 }, $pull: { questions: { question } } }
+          console.log('qre', question.tags);
+          console.log('value',value);
+          let tag = await Tag.findById({ _id: value._id });
+          console.log('ttt', tag);
+          if (tag?.count > 1) {
+            await Tag.findByIdAndUpdate(
+              { _id: tag._id},
+              { $inc: { count: -1 }, $pull: { questions:  question._id  } }
             );
           } else {
             await Tag.findByIdAndDelete({ _id: value });
@@ -344,6 +351,7 @@ router.put('/downvote/:id', auth, async (req, res) => {
 //@access Private
 router.put('/views/:id', auth, async (req, res) => {
   try {
+    
     const question = await Question.findById(req.params.id);
 
     if (!question) {
@@ -359,6 +367,7 @@ router.put('/views/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'déja vu' });
     }
     question.views.unshift({ user: req.user._id });
+    console.log(3);
     await question.save();
     res.json(question.views);
   } catch (error) {

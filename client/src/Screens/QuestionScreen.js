@@ -12,6 +12,7 @@ import { getProfile } from '../actions/profile';
 import Modal from '../Components/Modal';
 import Spinner from '../Components/Spinner';
 import Alert from '../Components/Alert';
+import QuestionByTagContainer from '../Container/QuestionByTagContainer';
 
 const QuestionScreen = () => {
   const location = useLocation();
@@ -227,6 +228,7 @@ const QuestionScreen = () => {
       <Routes>
         <Route exact path={'*'} element={<QuestionContainer />} />
         <Route path={`:questionId`} element={<SingleQuestionContainer />} />
+        <Route path={`/by/Tag`} element={<QuestionByTagContainer />} />
         <Route path='*' element={<Navigate to='/h/forum/question' replace />} />
       </Routes>
     </div>

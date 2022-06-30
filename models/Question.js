@@ -23,7 +23,8 @@ const QuestionSchema = mongoose.Schema(
       required: true,
     },
 
-    tags: [{
+    tags: [
+      {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'tag',
       },

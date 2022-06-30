@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import DownvoteIcon from './DownvoteIcon';
 import UpvoteIcon from './UpvoteIcon';
@@ -8,6 +8,7 @@ import {
   downvoteAnswer,
   deleteAnswer,
   editAnswer,
+  markAsSolved
 } from '../actions/question';
 import { useDispatch, useSelector } from 'react-redux';
 import Prism from 'prismjs';
@@ -27,7 +28,7 @@ import Spinner from '../Components/Spinner';
 import Loader from '../Components/Loader';
 import AnswerCommentsContainer from '../Container/AnswerCommentsContainer';
 
-const Answer = ({ ans }) => {
+const Answer = ({ ans,question }) => {
   const dispatch = useDispatch();
   const [CommentsOpen, setCommentsOpen] = useState(false);
   const [showComment, setshowComment] = useState(false);
@@ -56,7 +57,12 @@ const Answer = ({ ans }) => {
             {ans?.upvotes?.filter(
               (o) => o.user.toString() == userInfo?.user?._id?.toString()
             ).length > 0 ? (
-              <button className='w-full outline-none focus:outline-none'>
+              <button
+                className='w-full outline-none focus:outline-none'
+                onClick={() => {
+                  dispatch(upvoteAnswer(ans?._id));
+                }}
+              >
                 <UpvoteIcon color={true} />
               </button>
             ) : (
@@ -72,7 +78,12 @@ const Answer = ({ ans }) => {
             {ans?.downvotes?.filter(
               (o) => o.user.toString() == userInfo?.user?._id?.toString()
             ).length > 0 ? (
-              <button className='w-full outline-none focus:outline-none'>
+              <button
+                className='w-full outline-none focus:outline-none'
+                onClick={() => {
+                  dispatch(downvoteAnswer(ans?._id));
+                }}
+              >
                 <DownvoteIcon color={true} />
               </button>
             ) : (
@@ -102,24 +113,36 @@ const Answer = ({ ans }) => {
                 {ans?.downvotes?.length} downvotes
               </span>
               <i className='fas fa-marker mr-1'></i>written by- @
-              <Link to={`/h/user/${ans?.user?.username}`}>
+              <Link  to={
+                    userInfo?.user?._id.toString() ===
+                    question?.user?._id.toString()
+                      ? `/h/profile/about`
+                      : `/h/user/${ans?.user?._id}`
+                  }>
                 <span className='cursor-pointer hover:text-indigo-600 '>
                   {ans?.user?.fullname}
                 </span>
               </Link>
               <span className='ml-4'>
                 <i className='far fa-clock mr-1'></i>
-                {moment(ans?.updatedAt).startOf('hour').fromNow()}
+                {moment(ans?.createdAt).startOf('hour').fromNow()}
               </span>
+             {ans?.solution &&
+             (<span className='ml-4 text-green-600 '>
+             <i className='fas fa-check-circle mr-1 '></i>
+             Best answer
+           </span>)} 
+              
             </div>
           </div>
         </div>
 
-        <div className='flex mt-0 border-t dark:border-gray-600 cursor-pointer pt-1 text-center space-x-2'>
+       
           <div
             onClick={() => setshowComment(!showComment)}
-            className='flex w-1/2 border-r items-center justify-center hover:text-indigo-600 text-gray-500'
+            className='flex items-center justify-center mt-1 sm:mt-3 border-t dark:border-gray-600 cursor-pointer pt-1 text-center text-sm mr-2 text-gray-500'
           >
+          <div className={`flex hover:text-indigo-600  ${showComment && 'text-indigo-600 dark:text-gray-300'} items-center justify-center w-1/2`}>
             <span className='w-4 mr-2'>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
@@ -135,37 +158,44 @@ const Answer = ({ ans }) => {
                 />
               </svg>
             </span>
-            <span className='text-gray-500 hover:text-indigo-600 dark:text-gray-400 text-sm'>
-              Comment
-            </span>
+            <span className='text-xs sm:text-sm'>Comments</span>
           </div>
-         
-          {
-            userInfo?.user?._id.toString() ===
-              ans?.user?._id.toString() && (
+
+          {userInfo?.user?._id.toString() === ans?.user?._id.toString() && (
+            <div
+              onClick={() => {
+                setEditModal(true);
+              }}
+              className='w-1/2  hover:text-indigo-600'
+            >
+              <span className='text-xs sm:text-sm'>
+                <i className='mr-1 far fa-edit'></i>Edit
+              </span>
+            </div>
+          )}
+          {!ans?.solution &&
+              userInfo?.user?._id.toString() ===
+              question?.user?._id.toString() && !question?.solved && (
               <div
-                onClick={() => {
-                  setEditModal(true);
-                }}
+                onClick={() => dispatch(markAsSolved(ans?._id))}
                 className='w-1/2  hover:text-indigo-600'
               >
                 <span className='text-xs sm:text-sm'>
-                  <i className='mr-1 far fa-edit'></i>Edit
+                  <i className='mr-1 fas fa-check'></i> Mark as solution
                 </span>
               </div>
+              
             )}
-          {
-            userInfo?.user?._id.toString() ===
-              ans?.user?._id.toString() && (
-              <div
-                onClick={() => deleteHandler(ans?._id)}
-                className='w-1/2  hover:text-indigo-600'
-              >
-                <span className='text-xs sm:text-sm'>
-                  <i className='mr-1 far fa-trash-alt'></i> Delete
-                </span>
-              </div>
-            )}
+          {userInfo?.user?._id.toString() === ans?.user?._id.toString() && (
+            <div
+              onClick={() => deleteHandler(ans?._id)}
+              className='w-1/2  hover:text-indigo-600'
+            >
+              <span className='text-xs sm:text-sm'>
+                <i className='mr-1 far fa-trash-alt'></i> Delete
+              </span>
+            </div>
+          )}
         </div>
       </div>
       <Modal
@@ -182,7 +212,7 @@ const Answer = ({ ans }) => {
           }}
           validationSchema={fieldValidationSchema}
           onSubmit={(data, { setSubmitting }) => {
-            dispatch(editAnswer(ans._id,data));
+            dispatch(editAnswer(ans._id, data));
             console.log(data);
             setSubmitting(false);
           }}

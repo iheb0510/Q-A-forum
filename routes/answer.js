@@ -162,13 +162,14 @@ router.get('/', [auth], async (req, res) => {
 router.put('/upvote/:id', auth, async (req, res) => {
   try {
     const answer = await Answer.findById(req.params.id);
-    const answersIds = answer.upvotes.map((upvote) => upvote.user.toString());
-    const removeIndex = answersIds.indexOf(req.user._id);
 
-    const answersIds2 = answer.downvotes.map((downvote) =>
+    const answerIds = answer.upvotes.map((upvote) => upvote.user.toString());
+    const removeIndex = answerIds.indexOf(req.user._id.toString());
+
+    const answerIds2 = answer.downvotes.map((downvote) =>
       downvote.user.toString()
     );
-    const removeIndex2 = answersIds2.indexOf(req.user._id);
+    const removeIndex2 = answerIds2.indexOf(req.user._id.toString());
 
     //Check if the question is already upvoted by the user
     if (removeIndex2 !== -1) {
@@ -182,7 +183,7 @@ router.put('/upvote/:id', auth, async (req, res) => {
       }
     }
     await answer.save();
-    res.json(answer);
+    res.json({ upvotes: answer.upvotes, downvotes: answer.downvotes });
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server error');
@@ -216,7 +217,7 @@ router.put('/downvote/:id', auth, async (req, res) => {
       }
     }
     await answer.save();
-    res.json(answer);
+    res.json({ upvotes: answer.upvotes, downvotes: answer.downvotes });
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server error');
@@ -239,12 +240,19 @@ router.put('/solved/:id', auth, async (req, res) => {
       { _id: req.params.id },
       { $set: { solution: true } },
       { new: true }
-    );
+    )
+      .populate('user')
+      .populate('question')
+      .populate({ path: 'comments', populate: { path: 'user' } });
+
     const question = await Question.findOneAndUpdate(
       { _id: answer.question },
       { $set: { solved: true } },
       { new: true }
-    );
+    )
+      .populate({ path: 'tags', populate: { path: '_id' } })
+      .populate('user')
+      .populate('community');
     await updatePoints(answer.user, 10);
     await updatePoints(question.user, 5);
     res.json({ question: question, solution: answer.solution });

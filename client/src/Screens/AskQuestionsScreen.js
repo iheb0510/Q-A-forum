@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link, useLocation, Route, Routes, Navigate } from 'react-router-dom';
+import TopQuestionContainer from '../Container/TopQuestionContainer';
+import MostReleventTagsContainer from '../Container/MostReleventTagsContainer';
 import QuestionScreen from './QuestionScreen';
 
 const AskQuestionsScreen = () => {
@@ -41,31 +43,6 @@ const AskQuestionsScreen = () => {
                           <span className='h-full'>Ask Question</span>
                         </div>
                       </Link>
-                      <Link to={`/h/forum/articles`}>
-                        <div
-                          className={`flex items-center cursor-pointer ${
-                            currentPath === 'articles' &&
-                            'bg-white dark:bg-gray-700'
-                          } hover:bg-white dark:hover:bg-gray-700 px-3 py-2.5 text-sm font-medium`}
-                        >
-                          <span className='h-full text-blue-600 w-4 mr-1'>
-                            <svg
-                              xmlns='http://www.w3.org/2000/svg'
-                              fill='none'
-                              viewBox='0 0 24 24'
-                              stroke='currentColor'
-                            >
-                              <path
-                                strokeLinecap='round'
-                                strokeLinejoin='round'
-                                strokeWidth={2}
-                                d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
-                              />
-                            </svg>
-                          </span>
-                          <span className='h-full'>Article</span>
-                        </div>
-                      </Link>
                     </div>
                   </div>
                 </div>
@@ -77,8 +54,7 @@ const AskQuestionsScreen = () => {
         <div className='question_article_feed px-2'>
           <Routes>
             <Route path={`questions/*`} element={<QuestionScreen />} />
-            <Route path={`articles`} element={<></>} />
-            <Route path={`topArticles/:articleId`} element={<></>} />
+
             <Route
               path='*'
               element={<Navigate to='/h/forum/questions' replace />}
@@ -89,18 +65,13 @@ const AskQuestionsScreen = () => {
       <div className='hidden md:block'>
         
         <p className='text-md text-gray-600 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 font-semibold border-b-4 dark:border-gray-700 border-white p-2 mb-1'>
-          <i className='fas fa-newspaper mr-2'></i>Top Articles
+          <i className='fas fa-newspaper mr-2'></i>Top Questions
         </p>
-        <div>jjjjjjjjjjjjjjjjj</div>
-        <div>jjjjjjjjjjjjjjjjj</div>
-        <div>jjjjjjjjjjjjjjjjj</div>
-        <div>jjjjjjjjjjjjjjjjj</div>
+        <TopQuestionContainer/>
         <p className='text-md text-gray-600 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 font-semibold border-b-4 dark:border-gray-700 border-white p-2 mb-1'>
-          <i className='fas fa-newspaper mr-2'></i>Top Articles
+          <i className='fas fa-newspaper mr-2'></i>Most Relevent tags
         </p>
-        <div>hhhhhhhhhhhhhhhhhhhhhhhhh</div>
-        <div>jjjjjjjjjjjjjjjjj</div>
-        <div>jjjjjjjjjjjjjjjjj</div>
+        <MostReleventTagsContainer/>
         
       </div>
     </div>

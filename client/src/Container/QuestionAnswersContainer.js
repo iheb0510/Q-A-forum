@@ -147,9 +147,9 @@ const QuestionAnswersContainer = ({ question, details }) => {
       ) : error ? (
         <Alert fail msg={error} />
       ) : answersList && answersList?.length > 0 ? (
-        answersList?.map((ans) =>  <Answer key={ans?._id} ans={ans} />)
+        answersList?.map((ans) =>  <Answer key={ans?._id} question={question} ans={ans} />)
       ) : (
-        <Alert msg='No answers yet!' />
+        <Alert warning msg='No answers yet!' />
       )}
     </div>
   );

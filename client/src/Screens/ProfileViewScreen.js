@@ -14,6 +14,7 @@ import GithubScreen from './GithubScreen';
 import Alert from '../Components/Alert';
 import baseURL from '../baseURL';
 import DevAboutScreen from './DevAboutScreen';
+import ProfileQuestionScreen from './ProfileQuestionScreen';
 
 const ProfileViewScreen = () => {
   const {id} = useParams();
@@ -200,17 +201,6 @@ const ProfileViewScreen = () => {
                         <span className='h-full'>About</span>
                       </div>
                     </Link>
-                    <Link to={`/h/user/${id}/timeline`}>
-                      <div
-                        className={`flex items-center cursor-pointer ${
-                          currentPath === 'timeline' &&
-                          'bg-white dark:bg-gray-800 border-indigo-500'
-                        } text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 border-t-2 border-transparent px-3 py-2.5 text-sm font-medium`}
-                      >
-                        <i className='fas fa-stream mr-2 text-yellow-700'></i>
-                        <span className='h-full'>Timeline</span>
-                      </div>
-                    </Link>
                     <Link to={`/h/user/${id}/gh-profile`}>
                       <div
                         className={`flex items-center cursor-pointer ${
@@ -220,18 +210,6 @@ const ProfileViewScreen = () => {
                       >
                         <i className='fas fa-code-branch mr-2 text-green-600'></i>
                         <span className='h-full'>GitHub</span>
-                      </div>
-                    </Link>
-                    <Link to={`/h/user/${id}/ques`}>
-                      <div
-                        className={`flex items-center cursor-pointer ${
-                          currentPath === 'ques' &&
-                          'bg-white dark:bg-gray-800 border-indigo-500'
-                        }  text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 border-t-2 border-transparent px-3 py-2.5 text-sm font-medium`}
-                      >
-                        <i className='fas fa-question mr-2 text-red-500'></i>
-
-                        <span className='h-full'>My questions</span>
                       </div>
                     </Link>
                   </div>
@@ -255,8 +233,7 @@ const ProfileViewScreen = () => {
                 path={`gh-profile`}
                 element={<GithubScreen username={current?.github} />}
               />
-              <Route path={`timeline`} element={<></>} />
-              <Route path={`ques`} element={<></>} />
+              <Route path={`ques`} element={<ProfileQuestionScreen id={id}/>} />
               <Route
                 path='*'
                 element={<Navigate to={`/h/user/${id}/about`} replace />}

@@ -27,6 +27,7 @@ import { Field, FieldArray, Formik } from 'formik';
 import MyTextField from '../Components/MyTextField';
 import * as yup from 'yup';
 import Checkbox from '../Components/Checkbox';
+import CommunityQuestionScreen from './CommunityQuestionScreen';
 
 const CommunityViewScreen = () => {
   const { id } = useParams();
@@ -347,7 +348,7 @@ const CommunityViewScreen = () => {
                 element={<DevAboutScreen profile={current} loading={loading} />}
               />*/}
               <Route path={`timeline`} element={<></>} />
-              <Route path={`ques`} element={<></>} />
+              <Route path={`ques`} element={<CommunityQuestionScreen id={id}/>} />
               <Route
                 path='*'
                 element={<Navigate to={`/h/community/${id}/ques`} replace />}

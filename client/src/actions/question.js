@@ -17,6 +17,7 @@ import {
   ADD_ANSWER,
   EDIT_ANSWER,
   GET_ANSWER,
+  GET_TAGS,
   DELETE_ANSWER,
   MARK_AS_SOLVED,
   UPVOTE_ANSWER,
@@ -25,6 +26,7 @@ import {
   EDIT_COMMENT,
   DELETE_COMMENT,
   GET_ALL_ANSWERS,
+  GET_QUESTIONS_BY_TAG,
 } from './types';
 
 export const getAllQuestions = () => async (dispatch, getState) => {
@@ -57,7 +59,34 @@ export const getAllQuestions = () => async (dispatch, getState) => {
   }
 };
 
-export const getAllMyQuestions = () => async (dispatch, getState) => {
+export const getAllMyQuestions = (id) => async (dispatch, getState) => {
+  try {
+    
+    dispatch({
+      type: CLEAR_ERROR,
+    });
+    const {
+      auth: { userInfo },
+    } = getState();
+    const config = {
+      headers: {
+        'x-auth-token': `${userInfo.token}`,
+      },
+    };
+    const { data } = await axios.get(`${baseURL}/api/question/user/${id}`, config);
+    dispatch({
+      type: GET_ALL_MY_QUESTIONS,
+      payload: data,
+    });
+  } catch (err) {
+    dispatch({
+      type: SET_ERROR,
+      payload: err.response.data.message,
+    });
+  }
+};
+
+export const getQuestionsByCommunity = (id) => async (dispatch, getState) => {
   try {
     dispatch({
       type: SET_LOADING,
@@ -73,7 +102,7 @@ export const getAllMyQuestions = () => async (dispatch, getState) => {
         'x-auth-token': `${userInfo.token}`,
       },
     };
-    const { data } = await axios.get(`${baseURL}/api/question/q/me`, config);
+    const { data } = await axios.get(`${baseURL}/api/question/${id}`, config);
     dispatch({
       type: GET_ALL_MY_QUESTIONS,
       payload: data,
@@ -110,6 +139,7 @@ export const addQuestion = (body) => async (dispatch, getState) => {
       type: ADD_QUESTION,
       payload: data,
     });
+    dispatch(getTags())
   } catch (err) {
     dispatch({
       type: SET_ERROR,
@@ -146,6 +176,7 @@ export const editQuestion = (id, body) => async (dispatch, getState) => {
       type: EDIT_QUESTION,
       payload: data,
     });
+    dispatch(getTags())
   } catch (err) {
     dispatch({
       type: SET_ERROR,
@@ -178,6 +209,7 @@ export const deleteQuestion = (id) => async (dispatch, getState) => {
       type: DELETE_QUESTION,
       payload: id,
     });
+    dispatch(getTags())
   } catch (err) {
     dispatch({
       type: SET_ERROR,
@@ -242,10 +274,7 @@ export const viewQuestion = (id) => async (dispatch, getState) => {
       payload: { id, views: data },
     });
   } catch (err) {
-    dispatch({
-      type: SET_ERROR,
-      payload: err.response.data.message,
-    });
+    
   }
 };
 export const downvoteQuestion = (id) => async (dispatch, getState) => {
@@ -441,9 +470,7 @@ export const deleteAnswer = (id) => async (dispatch, getState) => {
 
 export const upvoteAnswer = (id) => async (dispatch, getState) => {
   try {
-    dispatch({
-      type: SET_LOADING,
-    });
+   
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -463,7 +490,7 @@ export const upvoteAnswer = (id) => async (dispatch, getState) => {
 
     dispatch({
       type: UPVOTE_ANSWER,
-      payload: data,
+      payload: { id, downvotes: data.downvotes,upvotes: data.upvotes },
     });
   } catch (err) {
     dispatch({
@@ -474,9 +501,7 @@ export const upvoteAnswer = (id) => async (dispatch, getState) => {
 };
 export const downvoteAnswer = (id) => async (dispatch, getState) => {
   try {
-    dispatch({
-      type: SET_LOADING,
-    });
+    
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -496,7 +521,7 @@ export const downvoteAnswer = (id) => async (dispatch, getState) => {
 
     dispatch({
       type: DOWNVOTE_ANSWER,
-      payload: data,
+      payload: { id, downvotes: data.downvotes,upvotes: data.upvotes },
     });
   } catch (err) {
     dispatch({
@@ -508,9 +533,7 @@ export const downvoteAnswer = (id) => async (dispatch, getState) => {
 
 export const markAsSolved = (id,idQuestion) => async (dispatch, getState) => {
   try {
-    dispatch({
-      type: SET_LOADING,
-    });
+  
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -530,7 +553,7 @@ export const markAsSolved = (id,idQuestion) => async (dispatch, getState) => {
 
     dispatch({
       type: MARK_AS_SOLVED,
-      payload: { question: data.question,solution: data.solution },
+      payload: { id,question: data.question,solution: data.solution },
     });
   } catch (err) {
     dispatch({
@@ -626,6 +649,60 @@ export const deleteComment = (id, idcom) => async (dispatch, getState) => {
     dispatch({
       type: DELETE_COMMENT,
       payload: { id, comments: data }
+    });
+  } catch (err) {
+    dispatch({
+      type: SET_ERROR,
+      payload: err.response.data.message,
+    });
+  }
+};
+
+export const getTags = () => async (dispatch, getState) => {
+  try {
+    
+    dispatch({
+      type: CLEAR_ERROR,
+    });
+    const {
+      auth: { userInfo },
+    } = getState();
+    const config = {
+      headers: {
+        'x-auth-token': `${userInfo.token}`,
+      },
+    };
+    const { data } = await axios.get(`${baseURL}/api/tag`, config);
+    dispatch({
+      type: GET_TAGS,
+      payload: data,
+    });
+  } catch (err) {
+    dispatch({
+      type: SET_ERROR,
+      payload: err.response.data.message,
+    });
+  }
+};
+
+export const getQuestionsByTag = (id) => async (dispatch, getState) => {
+  try {
+    
+    dispatch({
+      type: CLEAR_ERROR,
+    });
+    const {
+      auth: { userInfo },
+    } = getState();
+    const config = {
+      headers: {
+        'x-auth-token': `${userInfo.token}`,
+      },
+    };
+    const { data } = await axios.get(`${baseURL}/api/tag/${id}`, config);
+    dispatch({
+      type: GET_QUESTIONS_BY_TAG,
+      payload: data,
     });
   } catch (err) {
     dispatch({

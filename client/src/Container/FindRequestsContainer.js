@@ -51,7 +51,7 @@ const FindRequestsContainer = () => {
               ?.sort((a, b) => (a?.name > b?.name ? 1 : -1))
               ?.map((request) =>  <Request key={request?._id} request={request} />)
           ) : (
-            <Alert msg='No Requests!' />
+            <Alert warning msg='No Requests!' />
           )}</>}
         </div>
       </div>

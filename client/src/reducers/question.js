@@ -23,11 +23,14 @@ import {
   EDIT_COMMENT,
   DELETE_COMMENT,
   GET_ALL_ANSWERS,
+  GET_TAGS,
+  GET_QUESTIONS_BY_TAG,
 } from '../actions/types';
 
 const initialState = {
   questions: [],
   answers: [],
+  tags: [],
   question: {},
   loading: false,
   error: null,
@@ -42,16 +45,28 @@ export default (state = initialState, action) => {
         questions: action.payload,
         loading: false,
       };
-      case GET_ALL_ANSWERS:
+      case GET_QUESTIONS_BY_TAG:
         return {
           ...state,
-          answers: action.payload,
+          questions: action.payload,
           loading: false,
         };  
+    case GET_ALL_ANSWERS:
+      return {
+        ...state,
+        answers: action.payload,
+        loading: false,
+      };
     case GET_ALL_MY_QUESTIONS:
       return {
         ...state,
         questions: action.payload,
+        loading: false,
+      };
+    case GET_TAGS:
+      return {
+        ...state,
+        tags: action.payload,
         loading: false,
       };
     case GET_QUESTION:
@@ -223,7 +238,9 @@ export default (state = initialState, action) => {
             : answer
         ),
         questions: state.questions.map((question) =>
-          question._id === action.payload.question._id ? action.payload.question : question
+          question._id === action.payload.question._id
+            ? action.payload.question
+            : question
         ),
         loading: false,
       };

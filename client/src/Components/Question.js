@@ -2,7 +2,7 @@ import { Field, FieldArray, Formik } from 'formik';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useHistory, useRouteMatch } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import baseURL from '../baseURL';
 import Spinner from '../Components/Spinner';
 import { Editor } from '@tinymce/tinymce-react';
@@ -20,6 +20,7 @@ import {
   downvoteQuestion,
   editQuestion,
   upvoteQuestion,
+  viewQuestion,
 } from '../actions/question';
 import Alert from './Alert';
 import Loader from './Loader';
@@ -31,8 +32,9 @@ import * as yup from 'yup';
 import Modal from './Modal';
 import QuestionAnswersContainer from '../Container/QuestionAnswersContainer';
 
-const Question = ({ question, details = true }) => {
+const Question = ({ question, details }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [ansOpen, setAnsOpen] = useState(details ? true : false);
   const [editModal, setEditModal] = useState(false);
@@ -51,10 +53,10 @@ const Question = ({ question, details = true }) => {
   useEffect(() => {
     Prism.highlightAll();
   }, []);
-  
 
   const deleteHandler = (id) => {
     dispatch(deleteQuestion(id));
+    navigate(`/h/forum/questions`);
   };
 
   const fieldValidationSchema = yup.object().shape({
@@ -65,7 +67,7 @@ const Question = ({ question, details = true }) => {
       .required('Required!'),
     description: yup
       .string()
-      .max(500, 'Must be 500 charecter or less!')
+      .max(1000, 'Must be 500 charecter or less!')
       .min(10, 'At least 10 charecter!'),
   });
 
@@ -85,13 +87,20 @@ const Question = ({ question, details = true }) => {
             />
           </div>
 
-          <div className='h-full w-9/12'>
+          <div className='h-full w-11/12'>
             <div className='h-8 w-auto overflow-hidden '>
-              <Link to={`/h/forum/questions/${question && question?._id}`}>
-                <div className='text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-600 cursor-pointer text-xl font-semibold'>
+             
+             <Link
+                to={`/h/forum/questions/${
+                  question && question?._id.toString()
+                }`}
+                
+              >
+                <div className='text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-600 cursor-pointer text-xl font-semibold' onClick={() =>{dispatch(viewQuestion(question?._id))} }>
                   {question?.title}
                 </div>
               </Link>
+            
             </div>
             <div className='text-gray-400 text-xs'>
               <span className='mr-3'>
@@ -114,62 +123,76 @@ const Question = ({ question, details = true }) => {
                 <i className='fas fa-arrow-up mr-1'></i>
                 {question?.upvotes?.length} upvotes
               </span>
-              <span className='mr-5'>
+              <span className='mr-3'>
                 <i className='fas fa-arrow-down mr-1'></i>
                 {question?.downvotes?.length} downvotes
               </span>
-              <span className='mr-4'>
+              <span className='mr-3'>
+                <i className='fas fa-eye mr-1'></i>
+                {question?.views?.length} views
+              </span>
+              <span className='mr-3'>
                 <i className='far fa-clock mr-1'></i>
                 {moment(question?.createdAt).startOf('hour').fromNow()}
               </span>
-            </div>
-          </div>
-          <div className='ml-12 w-6 h-full'>
-            <div>
-              {question?.upvotes?.filter(
-                (o) => o.user.toString() == userInfo?.user?._id?.toString()
-              ).length > 0 ? (
-                <button
-                  className='w-full outline-none focus:outline-none'
-                  onClick={() => {
-                    dispatch(upvoteQuestion(question?._id));
-                  }}
-                >
-                  <UpvoteIcon color={true} />
-                </button>
-              ) : (
-                <button
-                  className='w-full outline-none focus:outline-none'
-                  onClick={() => {
-                    dispatch(upvoteQuestion(question?._id));
-                  }}
-                >
-                  <UpvoteIcon />
-                </button>
-              )}
-              {question?.downvotes.filter(
-                (o) => o.user.toString() == userInfo?.user?._id?.toString()
-              ).length > 0 ? (
-                <button
-                  className='w-full outline-none focus:outline-none'
-                  onClick={() => {
-                    dispatch(downvoteQuestion(question?._id));
-                  }}
-                >
-                  <DownvoteIcon color={true} />
-                </button>
-              ) : (
-                <button
-                  className='w-full outline-none focus:outline-none'
-                  onClick={() => {
-                    dispatch(downvoteQuestion(question?._id));
-                  }}
-                >
-                  <DownvoteIcon />
-                </button>
+              {question?.solved === true && (
+                <span className='mr-4 text-green-600 '>
+                  <i className='fas fa-check-circle mr-1 '></i>
+                  Solved
+                </span>
               )}
             </div>
           </div>
+          {details ? (
+            <div className='ml-12 w-6 h-full'>
+              <div>
+                {question?.upvotes?.filter(
+                  (o) => o.user.toString() == userInfo?.user?._id?.toString()
+                ).length > 0 ? (
+                  <button
+                    className='w-full outline-none focus:outline-none'
+                    onClick={() => {
+                      dispatch(upvoteQuestion(question?._id));
+                    }}
+                  >
+                    <UpvoteIcon color={true} />
+                  </button>
+                ) : (
+                  <button
+                    className='w-full outline-none focus:outline-none'
+                    onClick={() => {
+                      dispatch(upvoteQuestion(question?._id));
+                    }}
+                  >
+                    <UpvoteIcon />
+                  </button>
+                )}
+                {question?.downvotes.filter(
+                  (o) => o.user.toString() == userInfo?.user?._id?.toString()
+                ).length > 0 ? (
+                  <button
+                    className='w-full outline-none focus:outline-none'
+                    onClick={() => {
+                      dispatch(downvoteQuestion(question?._id));
+                    }}
+                  >
+                    <DownvoteIcon color={true} />
+                  </button>
+                ) : (
+                  <button
+                    className='w-full outline-none focus:outline-none'
+                    onClick={() => {
+                      dispatch(downvoteQuestion(question?._id));
+                    }}
+                  >
+                    <DownvoteIcon />
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className='ml-12 w-6 h-full'></div>
+          )}
         </div>
 
         {details && (
@@ -181,35 +204,42 @@ const Question = ({ question, details = true }) => {
           {question?.tags?.map((tag, idx) => (
             <span
               key={idx}
-              className='pl-1 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 mr-2 sm:mb-2 text-xs text-gray-500 py-.5 px-1 rounded mb-1'
+              className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600 mr-2'
             >
-              #{tag.name}
+              {tag.name}
             </span>
           ))}
         </div>
+
         <div
           onClick={() => setAnsOpen(!ansOpen)}
           className='flex items-center justify-center mt-1 sm:mt-3 border-t dark:border-gray-600 cursor-pointer pt-1 text-center text-sm mr-2 text-gray-500'
         >
-          <div className='flex hover:text-indigo-600 dark:text-gray-300 items-center justify-center w-1/2'>
-            <span className='mr-1'>
-              <svg
-                style={{ width: '15px' }}
-                xmlns='http://www.w3.org/2000/svg'
-                fill='none'
-                viewBox='0 0 24 24'
-                stroke='currentColor'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z'
-                />
-              </svg>
-            </span>
-            <span className='text-xs sm:text-sm'>Answers</span>
-          </div>
+          {details && (
+            <div
+              className={`flex hover:text-indigo-600  ${
+                ansOpen && 'text-indigo-600 dark:text-gray-300'
+              } items-center justify-center w-1/2`}
+            >
+              <span className='mr-1'>
+                <svg
+                  style={{ width: '15px' }}
+                  xmlns='http://www.w3.org/2000/svg'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z'
+                  />
+                </svg>
+              </span>
+              <span className='text-xs sm:text-sm'>Answers</span>
+            </div>
+          )}
           {details &&
             userInfo?.user?._id.toString() ===
               question?.user?._id.toString() && (
