@@ -45,3 +45,6 @@ export const DOWNVOTE_ANSWER = 'DOWNVOTE_ANSWER';
 export const ADD_COMMENT = 'ADD_COMMENT';
 export const EDIT_COMMENT = 'EDIT_COMMENT';
 export const DELETE_COMMENT = 'DELETE_COMMENT';
+export const GET_CHAT_ROOMS = 'GET_CHAT_ROOMS';
+export const CREATE_CHAT_ROOM = 'CREATE_CHAT_ROOM';
+export const CHAT_DELETE = 'CHAT_DELETE';

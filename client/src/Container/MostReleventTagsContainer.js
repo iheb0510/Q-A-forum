@@ -23,7 +23,7 @@ const TopQuestionContainer = () => {
 
 
   return (
-    <> 
+    <div className='bg-white dark:bg-gray-800 '> 
       {loading ? (
         <Loader />
       ) : error ? (
@@ -33,7 +33,7 @@ const TopQuestionContainer = () => {
           ?.sort((a, b) => (a.count < b.count ? 1 : -1))?.slice(0,50)
           ?.map((t) => <TopReleventTag key={t._id} tag={t} />)
       ) }
-    </>
+    </div>
   );
 };
 

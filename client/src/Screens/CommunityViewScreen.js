@@ -19,7 +19,7 @@ import {
   getCommunity,
   getRequests,
   joinCommunity,
-  getAllCommunities
+  getAllCommunities,
 } from '../actions/community';
 import User from '../Components/User';
 import Modal from '../Components/Modal';
@@ -60,8 +60,6 @@ const CommunityViewScreen = () => {
     dispatch(getRequests());
     dispatch(getAllCommunities());
   }, []);
-
-  
 
   const joinHandler = () => {
     if (community) {
@@ -348,7 +346,17 @@ const CommunityViewScreen = () => {
                 element={<DevAboutScreen profile={current} loading={loading} />}
               />*/}
               <Route path={`timeline`} element={<></>} />
-              <Route path={`ques`} element={<CommunityQuestionScreen id={id}/>} />
+              <Route
+                path={`ques`}
+                element={
+                  community?.members?.filter((u) => u._id === user._id).length >
+                  0 ? (
+                    <CommunityQuestionScreen id={id} />
+                  ) : (
+                    <Alert warning msg={'not joined yet'} />
+                  )
+                }
+              />
               <Route
                 path='*'
                 element={<Navigate to={`/h/community/${id}/ques`} replace />}

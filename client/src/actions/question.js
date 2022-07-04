@@ -61,7 +61,6 @@ export const getAllQuestions = () => async (dispatch, getState) => {
 
 export const getAllMyQuestions = (id) => async (dispatch, getState) => {
   try {
-    
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -73,7 +72,10 @@ export const getAllMyQuestions = (id) => async (dispatch, getState) => {
         'x-auth-token': `${userInfo.token}`,
       },
     };
-    const { data } = await axios.get(`${baseURL}/api/question/user/${id}`, config);
+    const { data } = await axios.get(
+      `${baseURL}/api/question/user/${id}`,
+      config
+    );
     dispatch({
       type: GET_ALL_MY_QUESTIONS,
       payload: data,
@@ -139,7 +141,7 @@ export const addQuestion = (body) => async (dispatch, getState) => {
       type: ADD_QUESTION,
       payload: data,
     });
-    dispatch(getTags())
+    dispatch(getTags());
   } catch (err) {
     dispatch({
       type: SET_ERROR,
@@ -176,7 +178,8 @@ export const editQuestion = (id, body) => async (dispatch, getState) => {
       type: EDIT_QUESTION,
       payload: data,
     });
-    dispatch(getTags())
+    dispatch(getAllAnswers());
+    dispatch(getTags());
   } catch (err) {
     dispatch({
       type: SET_ERROR,
@@ -187,7 +190,6 @@ export const editQuestion = (id, body) => async (dispatch, getState) => {
 
 export const deleteQuestion = (id) => async (dispatch, getState) => {
   try {
-    
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -209,7 +211,7 @@ export const deleteQuestion = (id) => async (dispatch, getState) => {
       type: DELETE_QUESTION,
       payload: id,
     });
-    dispatch(getTags())
+    dispatch(getTags());
   } catch (err) {
     dispatch({
       type: SET_ERROR,
@@ -220,7 +222,6 @@ export const deleteQuestion = (id) => async (dispatch, getState) => {
 
 export const upvoteQuestion = (id) => async (dispatch, getState) => {
   try {
-  
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -240,7 +241,7 @@ export const upvoteQuestion = (id) => async (dispatch, getState) => {
 
     dispatch({
       type: UPVOTE_QUESTION,
-      payload: { id, downvotes: data.downvotes,upvotes: data.upvotes },
+      payload: { id, downvotes: data.downvotes, upvotes: data.upvotes },
     });
   } catch (err) {
     dispatch({
@@ -251,7 +252,6 @@ export const upvoteQuestion = (id) => async (dispatch, getState) => {
 };
 export const viewQuestion = (id) => async (dispatch, getState) => {
   try {
-    
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -273,13 +273,10 @@ export const viewQuestion = (id) => async (dispatch, getState) => {
       type: VIEW_QUESTION,
       payload: { id, views: data },
     });
-  } catch (err) {
-    
-  }
+  } catch (err) {}
 };
 export const downvoteQuestion = (id) => async (dispatch, getState) => {
   try {
-   
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -299,7 +296,7 @@ export const downvoteQuestion = (id) => async (dispatch, getState) => {
 
     dispatch({
       type: DOWNVOTE_QUESTION,
-      payload: { id, downvotes: data.downvotes,upvotes: data.upvotes },
+      payload: { id, downvotes: data.downvotes, upvotes: data.upvotes },
     });
   } catch (err) {
     dispatch({
@@ -340,9 +337,6 @@ export const getAllQuestionAnswers = (id) => async (dispatch, getState) => {
 
 export const getAllAnswers = () => async (dispatch, getState) => {
   try {
-    dispatch({
-      type: SET_LOADING,
-    });
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -452,10 +446,7 @@ export const deleteAnswer = (id) => async (dispatch, getState) => {
         'x-auth-token': `${userInfo.token}`,
       },
     };
-    const { data } = await axios.delete(
-      `${baseURL}/api/answer/${id}`,
-      config
-    );
+    const { data } = await axios.delete(`${baseURL}/api/answer/${id}`, config);
     dispatch({
       type: DELETE_ANSWER,
       payload: id,
@@ -470,7 +461,6 @@ export const deleteAnswer = (id) => async (dispatch, getState) => {
 
 export const upvoteAnswer = (id) => async (dispatch, getState) => {
   try {
-   
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -490,7 +480,7 @@ export const upvoteAnswer = (id) => async (dispatch, getState) => {
 
     dispatch({
       type: UPVOTE_ANSWER,
-      payload: { id, downvotes: data.downvotes,upvotes: data.upvotes },
+      payload: { id, downvotes: data.downvotes, upvotes: data.upvotes },
     });
   } catch (err) {
     dispatch({
@@ -501,7 +491,6 @@ export const upvoteAnswer = (id) => async (dispatch, getState) => {
 };
 export const downvoteAnswer = (id) => async (dispatch, getState) => {
   try {
-    
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -521,7 +510,7 @@ export const downvoteAnswer = (id) => async (dispatch, getState) => {
 
     dispatch({
       type: DOWNVOTE_ANSWER,
-      payload: { id, downvotes: data.downvotes,upvotes: data.upvotes },
+      payload: { id, downvotes: data.downvotes, upvotes: data.upvotes },
     });
   } catch (err) {
     dispatch({
@@ -531,9 +520,8 @@ export const downvoteAnswer = (id) => async (dispatch, getState) => {
   }
 };
 
-export const markAsSolved = (id,idQuestion) => async (dispatch, getState) => {
+export const markAsSolved = (id, idQuestion) => async (dispatch, getState) => {
   try {
-  
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -553,7 +541,7 @@ export const markAsSolved = (id,idQuestion) => async (dispatch, getState) => {
 
     dispatch({
       type: MARK_AS_SOLVED,
-      payload: { id,question: data.question,solution: data.solution },
+      payload: { id, question: data.question, solution: data.solution },
     });
   } catch (err) {
     dispatch({
@@ -565,7 +553,6 @@ export const markAsSolved = (id,idQuestion) => async (dispatch, getState) => {
 
 export const addComment = (id, body) => async (dispatch, getState) => {
   try {
-   
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -586,7 +573,7 @@ export const addComment = (id, body) => async (dispatch, getState) => {
 
     dispatch({
       type: ADD_COMMENT,
-      payload: { id, comments: data }
+      payload: { id, comments: data },
     });
   } catch (err) {
     dispatch({
@@ -597,7 +584,6 @@ export const addComment = (id, body) => async (dispatch, getState) => {
 };
 export const editComment = (id, idcom, body) => async (dispatch, getState) => {
   try {
-   
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -618,7 +604,7 @@ export const editComment = (id, idcom, body) => async (dispatch, getState) => {
 
     dispatch({
       type: EDIT_COMMENT,
-      payload: { id, comments: data }
+      payload: { id, comments: data },
     });
   } catch (err) {
     dispatch({
@@ -629,7 +615,6 @@ export const editComment = (id, idcom, body) => async (dispatch, getState) => {
 };
 export const deleteComment = (id, idcom) => async (dispatch, getState) => {
   try {
-  
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -648,7 +633,7 @@ export const deleteComment = (id, idcom) => async (dispatch, getState) => {
     );
     dispatch({
       type: DELETE_COMMENT,
-      payload: { id, comments: data }
+      payload: { id, comments: data },
     });
   } catch (err) {
     dispatch({
@@ -660,7 +645,6 @@ export const deleteComment = (id, idcom) => async (dispatch, getState) => {
 
 export const getTags = () => async (dispatch, getState) => {
   try {
-    
     dispatch({
       type: CLEAR_ERROR,
     });
@@ -687,7 +671,6 @@ export const getTags = () => async (dispatch, getState) => {
 
 export const getQuestionsByTag = (id) => async (dispatch, getState) => {
   try {
-    
     dispatch({
       type: CLEAR_ERROR,
     });

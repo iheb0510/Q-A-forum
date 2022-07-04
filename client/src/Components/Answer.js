@@ -125,7 +125,7 @@ const Answer = ({ ans,question }) => {
               </Link>
               <span className='ml-4'>
                 <i className='far fa-clock mr-1'></i>
-                {moment(ans?.createdAt).startOf('hour').fromNow()}
+                {moment(ans?.createdAt).fromNow()}
               </span>
              {ans?.solution &&
              (<span className='ml-4 text-green-600 '>

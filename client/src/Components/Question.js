@@ -74,35 +74,39 @@ const Question = ({ question, details }) => {
   return (
     <>
       <div className='w-full bg-white dark:bg-gray-800 shadow rounded-md my-2 px-5 py-2 '>
-        <div className='flex h-16 items-center justify-between pb-2 my-1.5 border-b dark:border-gray-600 space-'>
-          <div className='mr-3 w-8 h-8 sm:w-10 sm:h-10'>
-            <img
-              className='border w-full h-full rounded-full'
-              src={
-                question?.user?.dp
-                  ? baseURL + '/' + question?.community?.dp
-                  : 'https://picsum.photos/200'
-              }
-              alt={question?.user?.username}
-            />
+        <div className='flex h-auto items-center  pb-2 my-1.5 border-b dark:border-gray-600 space-'>
+          <div className='mr-3  flex-none w-8 h-8 sm:w-8 sm:h-8'>
+            <Link to={`${`/h/community/${question?.community?._id}`}`}>
+              <img
+                className='border w-full h-full rounded-full'
+                src={
+                  question?.user?.dp
+                    ? baseURL + '/' + question?.community?.dp
+                    : 'https://picsum.photos/200'
+                }
+                alt={question?.user?.username}
+              />
+            </Link>
           </div>
 
-          <div className='h-full w-11/12'>
-            <div className='h-8 w-auto overflow-hidden '>
-             
-             <Link
+          <div className=' h-full w-10/13'>
+            <div className=' overflow-hidden '>
+              <Link
                 to={`/h/forum/questions/${
                   question && question?._id.toString()
                 }`}
-                
               >
-                <div className='text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-600 cursor-pointer text-xl font-semibold' onClick={() =>{dispatch(viewQuestion(question?._id))} }>
+                <div
+                  className='text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-600  cursor-pointer text-xl font-semibold'
+                  onClick={() => {
+                    dispatch(viewQuestion(question?._id));
+                  }}
+                >
                   {question?.title}
                 </div>
               </Link>
-            
             </div>
-            <div className='text-gray-400 text-xs'>
+            <div className='text-gray-400 text-xs mt-1'>
               <span className='mr-3'>
                 <i className='fas fa-marker mr-1'></i>written by- @
                 <Link
@@ -133,7 +137,7 @@ const Question = ({ question, details }) => {
               </span>
               <span className='mr-3'>
                 <i className='far fa-clock mr-1'></i>
-                {moment(question?.createdAt).startOf('hour').fromNow()}
+                {moment(question?.createdAt).fromNow()}
               </span>
               {question?.solved === true && (
                 <span className='mr-4 text-green-600 '>
@@ -144,7 +148,7 @@ const Question = ({ question, details }) => {
             </div>
           </div>
           {details ? (
-            <div className='ml-12 w-6 h-full'>
+            <div className='ml-12 flex-none w-6 h-full'>
               <div>
                 {question?.upvotes?.filter(
                   (o) => o.user.toString() == userInfo?.user?._id?.toString()
@@ -191,12 +195,12 @@ const Question = ({ question, details }) => {
               </div>
             </div>
           ) : (
-            <div className='ml-12 w-6 h-full'></div>
+            <div className=' flex-none ml-12 w-6 h-full'></div>
           )}
         </div>
 
         {details && (
-          <div className='text-gray-500 dark:text-gray-300 text-xs sm:text-sm h-auto w-full text-justify'>
+          <div className='text-gray-500 dark:text-gray-300 text-xs sm:text-sm h-auto w-full text-justify overflow-hidden '>
             {ReactHtmlParser(question?.description)}
           </div>
         )}

@@ -160,19 +160,18 @@ router.put(
       console.log('sq', tags);
       const community = await Community.findById(communityId);
       const user = await User.findById(req.user._id).select('-password');
-      const question = await Question.findById(req.params.id)
+      const question = await Question.findById(req.params.id);
 
       await Promise.all(
-        
         question.tags.map(async (value) => {
           console.log('qre', question.tags);
-          console.log('value',value);
+          console.log('value', value);
           let tag = await Tag.findById({ _id: value._id });
           console.log('ttt', tag);
           if (tag?.count > 1) {
             await Tag.findByIdAndUpdate(
-              { _id: tag._id},
-              { $inc: { count: -1 }, $pull: { questions:  question._id  } }
+              { _id: tag._id },
+              { $inc: { count: -1 }, $pull: { questions: question._id } }
             );
           } else {
             await Tag.findByIdAndDelete({ _id: value });
@@ -208,6 +207,7 @@ router.put(
         community,
         tags: Qtags,
       });
+
       const quested = await Question.findOneAndUpdate(
         { _id: question._id },
         { $set: newQuestion },
@@ -216,6 +216,9 @@ router.put(
         .populate({ path: 'tags', populate: { path: '_id' } })
         .populate('user')
         .populate('community');
+
+      await Answer.deleteMany({ question: question });
+
       res.json(quested);
     } catch (err) {
       console.error(err.message);
@@ -351,7 +354,6 @@ router.put('/downvote/:id', auth, async (req, res) => {
 //@access Private
 router.put('/views/:id', auth, async (req, res) => {
   try {
-    
     const question = await Question.findById(req.params.id);
 
     if (!question) {

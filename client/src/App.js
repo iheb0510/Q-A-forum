@@ -1,4 +1,4 @@
-import React,{useEffect} from 'react';
+import React, { useEffect } from 'react';
 import './styles/main.css';
 import '@pathofdev/react-tag-input/build/index.css';
 import './App.css';
@@ -12,9 +12,11 @@ import Header from './Components/Header';
 import RecoverPassword from './Screens/RecoverPassword';
 import ActivateAccount from './Screens/ActivateAccount';
 import PrivateRoute from './Components/PrivateRoute';
+import { io } from 'socket.io-client';
+
+export const socket = io('http://localhost:5000');
 
 function App() {
-
   return (
     <div className='bg-white w-full min-h-screen dark:bg-gray-900'>
       <div className='max-w-7xl h-full mx-auto bg-white dark:bg-gray-900'>

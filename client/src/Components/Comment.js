@@ -41,7 +41,7 @@ const Comment = ({ ans, cmnt }) => {
           </div>
         </div>
         <div className='flex text-gray-400 text-xs w-full'>
-          <span>{moment(cmnt.date).startOf('m').fromNow(true)}</span>
+          <span>{moment(cmnt.date).fromNow()}</span>
           <div className='ml-3'>
             @
             <span className='cursor-pointer hover:text-indigo-600 '>

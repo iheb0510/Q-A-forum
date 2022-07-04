@@ -6,6 +6,7 @@ import {
   Routes,
   useLocation,
   useParams,
+  useNavigate,
 } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUser } from '../actions/profile';
@@ -15,12 +16,17 @@ import Alert from '../Components/Alert';
 import baseURL from '../baseURL';
 import DevAboutScreen from './DevAboutScreen';
 import ProfileQuestionScreen from './ProfileQuestionScreen';
+import Spinner from '../Components/Spinner';
+import { v4 as uuidv4 } from 'uuid';
+import { createChatRoom } from '../actions/chat';
 
 const ProfileViewScreen = () => {
-  const {id} = useParams();
+  const { id } = useParams();
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname.split('/')[4];
+  const [roomId, setRoomId] = useState('');
 
   const signIn = useSelector((state) => state.auth);
   const { userInfo } = signIn;
@@ -36,6 +42,19 @@ const ProfileViewScreen = () => {
 
     return fetch;
   }, [dispatch, id]);
+
+  const createRoomForNewConversation = (receiverId) => {
+    const newRoomId = uuidv4();
+    setRoomId(newRoomId);
+    const roomInfo = {
+      roomId: newRoomId,
+      receiver: receiverId,
+      user_fname: current?.fullname,
+      user_dp: current?.dp,
+    };
+    dispatch(createChatRoom(roomInfo));
+    setTimeout(() => {navigate(`/h/messages/${newRoomId}`)}, 1000);
+  };
 
   return (
     <div className='profile p-1'>
@@ -87,10 +106,31 @@ const ProfileViewScreen = () => {
             ) : (
               <div className='name_address_location text-gray-500 dark:text-gray-300 text-sm'>
                 <div className='flex items-center justify-between'>
-                  <h4 className='text-2xl font-extrabold'>{current?.fullname}</h4>
+                  <h4 className='text-2xl font-extrabold'>
+                    {current?.fullname}
+                  </h4>
+                  <div className='flex items-center'>
+                    {current?._id !== userInfo?.user?._id && (
+                      <button
+                        onClick={() =>
+                          createRoomForNewConversation(current?._id)
+                        }
+                        className='border border-indigo-500 font-semibold bg-indigo-500 focus:outline-none px-2 py-1 text-sm hover:bg-indigo-600 text-white rounded'
+                      >
+                        {loading ? (
+                          <Spinner small />
+                        ) : (
+                          <i className='fas fa-paper-plane mr-1'></i>
+                        )}{' '}
+                        Send Message
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className='flex items-center'>
-                  <span className='text-gray-400 mr-4'>@{current?.username}</span>
+                  <span className='text-gray-400 mr-4'>
+                    @{current?.username}
+                  </span>
                   <span className='mr-4'>
                     {current?.points && <i className='mr-2 fas fa-star'></i>}
                     {current?.points}
@@ -152,8 +192,8 @@ const ProfileViewScreen = () => {
             {loading ? (
               <div className='h-5 bg-gray-200 w-full'></div>
             ) : (
-                current?.socials?.length > 0 &&
-                current?.socials?.reverse().map((el, idx) => {
+              current?.socials?.length > 0 &&
+              current?.socials?.reverse().map((el, idx) => {
                 const icn_cls =
                   el.platform === 'facebook'
                     ? 'fab fa-facebook text-blue-600 hover:text-blue-700'
@@ -233,7 +273,10 @@ const ProfileViewScreen = () => {
                 path={`gh-profile`}
                 element={<GithubScreen username={current?.github} />}
               />
-              <Route path={`ques`} element={<ProfileQuestionScreen id={id}/>} />
+              <Route
+                path={`ques`}
+                element={<ProfileQuestionScreen id={id} />}
+              />
               <Route
                 path='*'
                 element={<Navigate to={`/h/user/${id}/about`} replace />}
