@@ -7,6 +7,8 @@ import {
   SET_SUCCESS,
   GET_USERS,
   GET_USER,
+  CHANGE_WORK_STATUS,
+  RESET_PASSWORD,
 } from '../actions/types';
 
 const initialState = {
@@ -28,6 +30,13 @@ export default (state = initialState, action) => {
         success: false,
         loading: false,
       };
+    case CHANGE_WORK_STATUS:
+      return {
+        ...state,
+        user: { ...state.user, workStatus: action.payload },
+        success: false,
+        loading: false,
+      };
     case GET_USERS:
       return {
         ...state,
@@ -38,6 +47,12 @@ export default (state = initialState, action) => {
       return {
         ...state,
         current: action.payload,
+        loading: false,
+      };
+    case RESET_PASSWORD:
+      return {
+        ...state,
+        success: true,
         loading: false,
       };
     case EDIT_PROFILE:
@@ -62,7 +77,7 @@ export default (state = initialState, action) => {
         ...state,
         error: action.payload,
         loading: false,
-        sucess: false,
+        success: false,
       };
     case CLEAR_ERROR:
       return {

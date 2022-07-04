@@ -120,7 +120,7 @@ router.get('/:id', auth, async (req, res) => {
       .populate({ path: 'communities', populate: { path: 'members' } })
       .populate({ path: 'communities', populate: { path: 'createdby' } })
       .select('-password');
-    
+
     res.json(user);
   } catch (error) {
     console.error(error.message);
@@ -128,7 +128,7 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
-//@Route GET api/profile/:id
+//@Route GET api/profile
 // @Description  Test route
 // @Access Public
 router.get('/', auth, async (req, res) => {
@@ -144,4 +144,34 @@ router.get('/', auth, async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+//@Route Put api/profile/changeWorkStatus
+// @Description  changeWorkStatus
+// @Access Public
+router.put(
+  '/changeWorkStatus',
+  [auth, [check('workStatus', 'workStatus is required').not().isEmpty()]],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { workStatus } = req.body;
+    try {
+      const user = await User.findById(req.user._id)
+        .populate({ path: 'communities', populate: { path: 'members' } })
+        .populate({ path: 'communities', populate: { path: 'createdby' } })
+        .select('-password');
+
+      user.workStatus = workStatus;
+      await user.save();
+      res.json(user.workStatus);
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).send('Server error');
+    }
+  }
+);
+
 module.exports = router;

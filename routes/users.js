@@ -18,6 +18,7 @@ const transporter = nodemailer.createTransport(
 );
 
 const User = require('../models/User');
+const auth = require('../middleware/auth');
 
 // @route     POST api/users
 // @desc      Regiter a user
@@ -244,6 +245,61 @@ router.post(
       } else {
         res.status(404);
         throw new Error('User not found!');
+      }
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+    }
+  }
+);
+
+// @route     POST api/users/reset_password
+// @desc      reset password
+// @access    private
+router.put(
+  '/reset_new_password',
+  [
+    auth,
+    [
+      check(
+        'old_password',
+        'Please enter a password with 6 or more characters'
+      ).isLength({ min: 6 }),
+      check(
+        'new_password',
+        'Please enter a password with 6 or more characters'
+      ).isLength({ min: 6 }),
+      check(
+        'confirm_password',
+        'Please enter a password with 6 or more characters'
+      ).isLength({ min: 6 }),
+    ],
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { old_password, new_password, confirm_password } = req.body;
+
+    try {
+      const user = await User.findById(req.user._id).select('+password');
+      if (user) {
+        if (await bcrypt.compare(old_password, user.password)) {
+          if (new_password === confirm_password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(new_password, salt);
+            await user.save();
+            res.status(200).json({ message: 'Password reset successfully!' });
+          } else {
+            res.status(403).json({ message: 'Password does not match!' });
+          }
+        } else {
+          res.status(403).json({ message: 'Invalid Previous Password!' });
+        }
+      } else {
+        res.status(404).json({ message: 'User not found!' });
       }
     } catch (err) {
       console.error(err.message);

@@ -9,6 +9,8 @@ import {
   SET_SUCCESS,
   GET_USERS,
   GET_USER,
+  CHANGE_WORK_STATUS,
+  RESET_PASSWORD,
 } from './types';
 
 export const getProfile = (id) => async (dispatch, getState) => {
@@ -97,6 +99,72 @@ export const getUsers = () => async (dispatch, getState) => {
     dispatch({
       type: SET_ERROR,
       payload: err.response.data.msg,
+    });
+  }
+};
+
+export const changeWorkStatus = (body) => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: SET_LOADING,
+    });
+    dispatch({
+      type: CLEAR_ERROR,
+    });
+    const {
+      auth: { userInfo },
+    } = getState();
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': `${userInfo.token}`,
+      },
+    };
+    const { data } = await axios.put(
+      `${baseURL}/api/profile/changeWorkStatus`,
+      body,
+      config
+    );
+
+    dispatch({
+      type: CHANGE_WORK_STATUS,
+      payload: data,
+    });
+  } catch (err) {
+    dispatch({
+      type: SET_ERROR,
+      payload: err.response.data.msg,
+    });
+  }
+};
+
+export const reset_new_password = (body) => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: SET_LOADING,
+    });
+    dispatch(setSuccess());
+    dispatch({
+      type: CLEAR_ERROR,
+    });
+    const {
+      auth: { userInfo },
+    } = getState();
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': `${userInfo.token}`,
+      },
+    };
+    await axios.put(`${baseURL}/api/users/reset_new_password`, body, config);
+
+    dispatch({
+      type: RESET_PASSWORD,
+    });
+  } catch (err) {
+    dispatch({
+      type: SET_ERROR,
+      payload: err.response.data.message,
     });
   }
 };
