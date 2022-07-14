@@ -7,7 +7,6 @@ import OpenChatScreen from './OpenChatScreen';
 import Loader from '../Components/Loader';
 import { getChatRooms } from '../actions/chat';
 
-const recId = JSON.parse(localStorage?.getItem('recInfo'))?._id;
 
 const ChatScreen = () => {
   const dispatch = useDispatch();
@@ -62,15 +61,9 @@ const ChatScreen = () => {
                       />
                     </div>
                     <div>
-                      {loggedUserId ? (
+                      {loggedUserId && (
                         <p className='text-gray-500 dark:text-gray-300 font-semibold'>
                           {room?.sender === loggedUserId
-                            ? room?.user_fname
-                            : room?.sender_fname}
-                        </p>
-                      ) : (
-                        <p className='text-gray-500 dark:text-gray-300 font-semibold'>
-                          {room?.sender === recId
                             ? room?.user_fname
                             : room?.sender_fname}
                         </p>

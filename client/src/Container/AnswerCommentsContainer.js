@@ -2,9 +2,6 @@ import React, { useEffect, useState,useRef } from 'react';
 import data from '@emoji-mart/data'
 import { Picker } from 'emoji-mart'
 import { useDispatch, useSelector } from 'react-redux';
-//import Comment from '../Components/Comment';
-import CommentLoader from '../Components/CommentLoader';
-import Alert from '../Components/Alert';
 import { addComment } from '../actions/question';
 import Comment from '../Components/Comment';
 

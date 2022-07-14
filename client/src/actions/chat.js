@@ -20,8 +20,8 @@ export const getChatRooms = (userId) => async (dispatch, getState) => {
       type: CLEAR_ERROR,
     });
     dispatch({
-        type: SET_SUCCESS,
-      });
+      type: SET_SUCCESS,
+    });
     const {
       auth: { userInfo },
     } = getState();
@@ -56,8 +56,8 @@ export const createChatRoom = (roomInfo) => async (dispatch, getState) => {
       type: CLEAR_ERROR,
     });
     dispatch({
-        type: SET_SUCCESS,
-      });
+      type: SET_SUCCESS,
+    });
     const {
       auth: { userInfo },
     } = getState();
@@ -87,8 +87,8 @@ export const deleteChat = (roomId) => async (dispatch, getState) => {
       type: CLEAR_ERROR,
     });
     dispatch({
-        type: SET_SUCCESS,
-      });
+      type: SET_SUCCESS,
+    });
     const {
       auth: { userInfo },
     } = getState();
@@ -100,6 +100,7 @@ export const deleteChat = (roomId) => async (dispatch, getState) => {
     await axios.delete(`${baseURL}/api/chat/deleteChat/${roomId}`, config);
     dispatch({
       type: CHAT_DELETE,
+      payload: roomId,
     });
   } catch (error) {
     dispatch({

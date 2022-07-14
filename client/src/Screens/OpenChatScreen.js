@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Message from '../Components/Message';
 import Alert from '../Components/Alert';
 import Loader from '../Components/Loader';
@@ -11,6 +11,7 @@ const OpenChatScreen = () => {
   const bottomListRef = useRef();
   const inputRef = useRef();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { roomId } = useParams();
   const [newMessage, setNewMessage] = useState('');
@@ -56,6 +57,7 @@ const OpenChatScreen = () => {
 
   const chatDeleteHandler = () => {
     dispatch(deleteChat(roomId));
+    navigate('/h/messages');
   };
 
   return (

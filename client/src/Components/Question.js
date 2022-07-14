@@ -74,7 +74,7 @@ const Question = ({ question, details }) => {
   return (
     <>
       <div className='w-full bg-white dark:bg-gray-800 shadow rounded-md my-2 px-5 py-2 '>
-        <div className='flex h-auto items-center  pb-2 my-1.5 border-b dark:border-gray-600 space-'>
+        <div className='flex h-auto items-center justify-between  pb-2 my-1.5 border-b dark:border-gray-600 '>
           <div className='mr-3  flex-none w-8 h-8 sm:w-8 sm:h-8'>
             <Link to={`${`/h/community/${question?.community?._id}`}`}>
               <img
@@ -89,7 +89,7 @@ const Question = ({ question, details }) => {
             </Link>
           </div>
 
-          <div className=' h-full w-10/13'>
+          <div className=' flex-1 h-full w-10/13'>
             <div className=' overflow-hidden '>
               <Link
                 to={`/h/forum/questions/${
@@ -149,7 +149,7 @@ const Question = ({ question, details }) => {
           </div>
           {details ? (
             <div className='ml-12 flex-none w-6 h-full'>
-              <div>
+              <div className='mr-0'>
                 {question?.upvotes?.filter(
                   (o) => o.user.toString() == userInfo?.user?._id?.toString()
                 ).length > 0 ? (

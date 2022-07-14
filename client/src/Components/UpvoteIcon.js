@@ -1,9 +1,9 @@
 import React from 'react';
 
-const UpvoteIcon = ({ color, fromAnswer }) => {
+const UpvoteIcon = ({ color }) => {
   return (
     <div
-      className={`${fromAnswer ? 'w-5' : 'w-full'} cursor-pointer  ${
+      className={`w-full cursor-pointer  ${
         color
           ? 'bg-indigo-500 text-white '
           : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300 hover:bg-gray-300 '
