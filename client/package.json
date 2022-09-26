@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@emoji-mart/data": "^1.0.2",
+    "@emoji-mart/react": "^1.0.1",
     "@headlessui/react": "^1.6.1",
     "@pathofdev/react-tag-input": "^1.0.7",
     "@testing-library/jest-dom": "^5.16.4",

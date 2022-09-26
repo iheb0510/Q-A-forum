@@ -53,7 +53,9 @@ const ProfileViewScreen = () => {
       user_dp: current?.dp,
     };
     dispatch(createChatRoom(roomInfo));
-    setTimeout(() => {navigate(`/h/messages/${newRoomId}`)}, 1000);
+    setTimeout(() => {
+      navigate(`/h/messages/${newRoomId}`);
+    }, 1000);
   };
 
   return (
@@ -192,8 +194,8 @@ const ProfileViewScreen = () => {
             {loading ? (
               <div className='h-5 bg-gray-200 w-full'></div>
             ) : (
-              current?.socials?.length > 0 &&
-              current?.socials?.reverse().map((el, idx) => {
+              current?.social?.length > 0 &&
+              current?.social?.reverse().map((el, idx) => {
                 const icn_cls =
                   el.platform === 'facebook'
                     ? 'fab fa-facebook text-blue-600 hover:text-blue-700'
@@ -216,9 +218,20 @@ const ProfileViewScreen = () => {
                     : el.platform === 'stackoverflow' &&
                       'fab fa-stack-overflow text-yellow-600 hover:text-amber-700';
                 return (
-                  <a key={idx} href={el.link}>
+                  <Link
+                    to={'/h/profile/about'}
+                    key={idx}
+                    onClick={() =>
+                      window.open(
+                        el.link.includes('http')
+                          ? el.link
+                          : `http://${el.link}`,
+                        '_blank'
+                      )
+                    }
+                  >
                     <i className={icn_cls}></i>
-                  </a>
+                  </Link>
                 );
               })
             )}

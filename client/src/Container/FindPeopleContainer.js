@@ -50,7 +50,7 @@ const FindPeopleContainer = () => {
             ?.sort((a, b) => (a?.fullname > b?.fullname ? 1 : -1))
             ?.map((user) =>  <User key={user?._id} user={user} />)
         ) : (
-          <Alert msg='No Users!' />
+          <Alert warning msg='No Users!' />
         )}
       </div>
     </div>

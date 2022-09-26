@@ -120,6 +120,7 @@ const DevAboutScreen = ({ profile, loading }) => {
           </div>
         )
       )}
+
     </div>
   );
 };

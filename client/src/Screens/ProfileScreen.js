@@ -69,10 +69,23 @@ const ProfileScreen = () => {
       .required('Required!'),
     bio: yup.string().max(150, 'Max 150 charecters').min(5, 'Min 5 charecter'),
     location: yup.string().max(100).min(5, 'Min 5 charecter'),
-    website: yup.string().max(100).min(5, 'Min 5 charecter').url(),
+    website: yup
+      .string()
+      .max(100)
+      .min(5, 'Min 5 charecter')
+      .matches(
+        /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+        'Enter correct url!'
+      ),
     social: yup.array().of(
       yup.object().shape({
-        link: yup.string().url(),
+        link: yup
+          .string()
+          .matches(
+            /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+            'Enter correct url!'
+          )
+          .required('Please enter website'),
       })
     ),
     education: yup.array().of(
@@ -250,8 +263,8 @@ const ProfileScreen = () => {
             {loading ? (
               <div className='h-5 bg-gray-200 w-full'></div>
             ) : (
-              user?.socials?.length > 0 &&
-              user?.socials?.reverse().map((el, idx) => {
+              user?.social?.length > 0 &&
+              user?.social?.reverse().map((el, idx) => {
                 const icn_cls =
                   el.platform === 'facebook'
                     ? 'fab fa-facebook text-blue-600 hover:text-blue-700'
@@ -274,9 +287,13 @@ const ProfileScreen = () => {
                     : el.platform === 'stackoverflow' &&
                       'fab fa-stack-overflow text-yellow-600 hover:text-amber-700';
                 return (
-                  <a key={idx} href={el.link}>
+                  <Link
+                    to={'/h/profile/about'}
+                    key={idx}
+                    onClick={()=> window.open(el.link.includes('http')? el.link :`http://${el.link}`, '_blank')}
+                  >
                     <i className={icn_cls}></i>
-                  </a>
+                  </Link>
                 );
               })
             )}

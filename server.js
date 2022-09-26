@@ -51,7 +51,7 @@ io.on('connection', (socket) => {
   });
 
   // send message
-  socket.on('sendMessage', async (message, username,room, callback) => {
+  socket.on('sendMessage', async (message, username, room, callback) => {
     const user = getUser(socket.id, username, room);
     console.log('ff', user);
     if (user) {

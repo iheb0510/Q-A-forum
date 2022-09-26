@@ -64,11 +64,13 @@ const TopQuestionContainer = () => {
         <Loader />
       ) : error ? (
         <Alert fail msg={error} />
-      ) : filterQuestions?.length > 0 && (
+      ) : (
+        filterQuestions?.length > 0 &&
         filterQuestions
-          ?.sort((a, b) => (a.upvotes.length < b.upvotes.length ? 1 : -1))?.slice(0,5)
+          ?.sort((a, b) => (a.upvotes.length < b.upvotes.length ? 1 : -1))
+          ?.slice(0, 5)
           ?.map((q) => <TopQuestion key={q._id} question={q} />)
-      ) }
+      )}
     </>
   );
 };

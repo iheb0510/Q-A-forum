@@ -1,8 +1,9 @@
-import React, { useEffect, useState,useRef } from 'react';
-import data from '@emoji-mart/data'
-import { Picker } from 'emoji-mart'
+import React, { useEffect, useState, useRef } from 'react';
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addComment } from '../actions/question';
+import Modal from '../Components/Modal';
 import Comment from '../Components/Comment';
 
 const AnswerCommentsContainer = ({ ans }) => {
@@ -24,15 +25,6 @@ const AnswerCommentsContainer = ({ ans }) => {
     setComment('');
   };
 
-  function EmojiPicker(props) {
-    const ref = useRef()
-  
-    useEffect(() => {
-      new Picker({ ...props, data, ref })
-    }, [])
-  
-    return <div ref={ref} />
-  }
   return (
     <div
       className='py-2 bg-white dark:bg-gray-700 max-h-96 overflow-hidden rounded shadow'
@@ -56,15 +48,6 @@ const AnswerCommentsContainer = ({ ans }) => {
               <i className='text-gray-400 far fa-grin'></i>
             </span>
           </div>
-          <div className='absolute right-0' style={{ left: '75%' }}>
-            {emojiOn && (
-              <EmojiPicker
-                onEmojiSelect={(emoji) => {
-                  setComment(comment.concat(emoji.native));
-                }}
-              />
-            )}
-          </div>
         </div>
         <button
           onClick={commentHandler}
@@ -77,6 +60,21 @@ const AnswerCommentsContainer = ({ ans }) => {
         >
           Send
         </button>
+        <Modal
+          modalOpen={emojiOn}
+          setModalOpen={setEmoji}
+          title='Emoji'
+          titleIcon='fas fa-edit'
+        >
+          <div className={'flex justify-center'}>
+            <Picker
+              data={data}
+              onEmojiSelect={(emoji) => {
+                setComment(comment.concat(emoji.native));
+              }}
+            />
+          </div>
+        </Modal>
       </div>
 
       {

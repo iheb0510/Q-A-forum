@@ -6,7 +6,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import Alert from './Alert';
 import {
   acceptRequest,
-  getRequests,
   refuseRequest,
 } from '../actions/community';
 
@@ -14,8 +13,6 @@ const Request = ({ request }) => {
   const dispatch = useDispatch();
   const devProfile = useSelector((state) => state.profile);
   const { error, user } = devProfile;
-  const devvom = useSelector((state) => state.community);
-  const { loading, requests } = devvom;
 
   const AcceptHandler = () => {
     if (request) {

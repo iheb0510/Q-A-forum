@@ -89,7 +89,7 @@ const Question = ({ question, details }) => {
             </Link>
           </div>
 
-          <div className=' flex-1 h-full w-10/13'>
+          <div className=' flex-auto h-full w-auto'>
             <div className=' overflow-hidden '>
               <Link
                 to={`/h/forum/questions/${
@@ -148,7 +148,7 @@ const Question = ({ question, details }) => {
             </div>
           </div>
           {details ? (
-            <div className='ml-12 flex-none w-6 h-full'>
+            <div className='flex-none w-6 h-full'>
               <div className='mr-0'>
                 {question?.upvotes?.filter(
                   (o) => o.user.toString() == userInfo?.user?._id?.toString()
@@ -195,7 +195,7 @@ const Question = ({ question, details }) => {
               </div>
             </div>
           ) : (
-            <div className=' flex-none ml-12 w-6 h-full'></div>
+            <div className=' flex-none w-6 h-full'></div>
           )}
         </div>
 
