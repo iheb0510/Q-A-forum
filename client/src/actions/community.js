@@ -11,9 +11,11 @@ import {
   GET_COMMUNITY,
   DELETE_COMMUNITY,
   JOIN_COMMUNITY,
+  EXIT_COMMUNITY,
   GET_REQUESTS,
   ACCEPT_REQUEST,
   REFUSE_REQUEST,
+  DELETE_REQUEST,
 } from './types';
 
 export const getAllCommunities = () => async (dispatch) => {
@@ -158,13 +160,49 @@ export const joinCommunity = (id) => async (dispatch, getState) => {
         'x-auth-token': `${userInfo.token}`,
       },
     };
-    const {data} =await axios.put(`${baseURL}/api/community/join/${id}`, {}, config);
+    const { data } = await axios.put(
+      `${baseURL}/api/community/join/${id}`,
+      {},
+      config
+    );
 
     dispatch({
       type: JOIN_COMMUNITY,
-      payload: { id, community: data.community,requests: data.requests },
+      payload: { id, community: data.community, requests: data.requests },
     });
-    
+  } catch (err) {
+    dispatch({
+      type: SET_ERROR,
+      payload: err.response.data.message,
+    });
+  }
+};
+
+export const exitCommunity = (id) => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: SET_LOADING,
+    });
+    dispatch({
+      type: CLEAR_ERROR,
+    });
+    const {
+      auth: { userInfo },
+    } = getState();
+    const config = {
+      headers: {
+        'x-auth-token': `${userInfo.token}`,
+      },
+    };
+    const { data } = await axios.put(
+      `${baseURL}/api/community/exit/${id}`,
+      {},
+      config
+    );
+    dispatch({
+      type: EXIT_COMMUNITY,
+      payload: { id, community: data.community, requests: data.requests },
+    });
   } catch (err) {
     dispatch({
       type: SET_ERROR,
@@ -241,6 +279,40 @@ export const refuseRequest = (id) => async (dispatch, getState) => {
     });
   }
 };
+
+export const deleteRequest = (id) => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: SET_LOADING,
+    });
+    dispatch({
+      type: CLEAR_ERROR,
+    });
+    const {
+      auth: { userInfo },
+    } = getState();
+    const config = {
+      headers: {
+        'x-auth-token': `${userInfo.token}`,
+      },
+    };
+    const { data } = await axios.delete(
+      `${baseURL}/api/community/deleteRequest/${id}`,
+      config
+    );
+
+    dispatch({
+      type: DELETE_REQUEST,
+      payload: id,
+    });
+  } catch (err) {
+    dispatch({
+      type: SET_ERROR,
+      payload: err.response.data.msg,
+    });
+  }
+};
+
 export const getRequests = () => async (dispatch, getState) => {
   try {
     dispatch({

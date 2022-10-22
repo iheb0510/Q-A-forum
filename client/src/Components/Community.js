@@ -4,7 +4,7 @@ import baseURL from '../baseURL';
 import Spinner from './Spinner';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from './Alert';
-import { getRequests, joinCommunity } from '../actions/community';
+import { deleteRequest, exitCommunity, getRequests, joinCommunity } from '../actions/community';
 
 function Community({ community }) {
   const dispatch = useDispatch();
@@ -12,10 +12,21 @@ function Community({ community }) {
   const { error, user } = devProfile;
   const devvom = useSelector((state) => state.community);
   const { loading, requests } = devvom;
-  
+
   const joinHandler = () => {
     if (community) {
       dispatch(joinCommunity(community?._id));
+    }
+  };
+  const deleteHandler = () => {
+    if (community) {
+       const request = requests?.find((u) => u.sentby === user._id && u.community === community?._id)
+      dispatch(deleteRequest(request?._id));
+    }
+  };
+  const exitHandler = () => {
+    if (community) {
+      dispatch(exitCommunity(community?._id));
     }
   };
   return (
@@ -48,9 +59,12 @@ function Community({ community }) {
           requests?.filter(
             (u) => u.sentby === user._id && u.community === community?._id
           ).length > 0 ? (
-            <div className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600 disabled'>
-              Request already sent
-            </div>
+            <button
+              onClick={deleteHandler}
+              className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600'
+            >
+              Delete Request
+            </button>
           ) : (
             <button
               onClick={joinHandler}
@@ -61,9 +75,12 @@ function Community({ community }) {
             </button>
           )
         ) : community?.createdby?._id !== user._id ? (
-          <div className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600 disabled'>
-            Joined
-          </div>
+          <button
+              onClick={exitHandler}
+              className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600'
+            >
+              Exit community
+            </button>
         ) : (
           <div className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600 disabled'>
             yours

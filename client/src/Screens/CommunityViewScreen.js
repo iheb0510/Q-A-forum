@@ -20,6 +20,8 @@ import {
   getRequests,
   joinCommunity,
   getAllCommunities,
+  deleteRequest,
+  exitCommunity,
 } from '../actions/community';
 import User from '../Components/User';
 import Modal from '../Components/Modal';
@@ -64,6 +66,19 @@ const CommunityViewScreen = () => {
   const joinHandler = () => {
     if (community) {
       dispatch(joinCommunity(community?._id));
+    }
+  };
+  const deleteHandler = () => {
+    if (community) {
+      const request = requests?.find(
+        (u) => u.sentby === user._id && u.community === community?._id
+      );
+      dispatch(deleteRequest(request?._id));
+    }
+  };
+  const exitHandler = () => {
+    if (community) {
+      dispatch(exitCommunity(community?._id));
     }
   };
 
@@ -158,9 +173,12 @@ const CommunityViewScreen = () => {
                       (u) =>
                         u.sentby === user._id && u.community === community?._id
                     ).length > 0 ? (
-                      <div className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600 disabled'>
-                        Request already sent
-                      </div>
+                      <button
+                        onClick={deleteHandler}
+                        className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600'
+                      >
+                        Delete Request
+                      </button>
                     ) : (
                       <button
                         onClick={joinHandler}
@@ -171,9 +189,12 @@ const CommunityViewScreen = () => {
                       </button>
                     )
                   ) : community?.createdby?._id !== user._id ? (
-                    <div className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600 disabled'>
-                      Joined
-                    </div>
+                    <button
+                      onClick={exitHandler}
+                      className='text-sm bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600'
+                    >
+                      Exit community
+                    </button>
                   ) : (
                     <button
                       onClick={() => setEditModal(!editModal)}

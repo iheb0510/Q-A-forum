@@ -106,7 +106,7 @@ router.put(
       const alreadysent = requ.filter(
         (requete) => requete.community.toString() === req.params.id
       );
-      
+
       /*  if (alreadysent.length > 0) {
         return res.status(404).json({ message: 'Request already sent ' });
       }*/
@@ -208,6 +208,23 @@ router.put('/refuse/:id', [auth], async (req, res) => {
   }
 });
 
+// @route     Put api/community/deleteRequest
+// @desc      delete request
+// @access    private
+router.delete('/deleteRequest/:id', [auth], async (req, res) => {
+  try {
+    const request = await Request.findById(req.params.id);
+    await request.remove();
+    res.json(request);
+  } catch (error) {
+    console.error(error.message);
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'User not Found ' });
+    }
+    res.status(500).send('Server error');
+  }
+});
+
 // @route     Put api/community/delete/:id
 // @desc      delete community
 // @access    private
@@ -257,6 +274,55 @@ router.put('/delete/:id', [auth], async (req, res) => {
   }
 });
 
+// @route     Put api/community/exit/:id
+// @desc      exit community
+// @access    private
+router.put('/exit/:id', [auth], async (req, res) => {
+  try {
+    const community = await Community.findById(req.params.id);
+    if (!community) {
+      res.json({ message: 'community not found ' });
+    } else if (community.createdby.toString() === req.user._id) {
+      return res.status(404).json({ message: "it's  your community " });
+    } else {
+      const com = await Community.findOneAndUpdate(
+        { _id: req.params.id },
+        {
+          $pull: {
+            members: req.user._id,
+          },
+        },
+        { new: true }
+      )
+        .populate('members')
+        .populate('createdby');
+      console.log('ddd', com);
+
+      const u = await User.findOneAndUpdate(
+        { _id: req.user._id },
+        {
+          $pull: {
+            communities: community._id,
+          },
+        },
+        { new: true }
+      );
+
+      await Request.deleteOne({ community: com, sentby: u });
+      const requests = await Request.find().sort({
+        createdAt: -1,
+      });
+      res.json({ community: com, requests: requests });
+    }
+  } catch (error) {
+    console.error(error.message);
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'User not Found ' });
+    }
+    res.status(500).send('Server error');
+  }
+});
+
 //@Route GET api/community/requests
 // @Description  Test route
 // @Access private
@@ -285,7 +351,7 @@ router.get('/requestsMe', auth, async (req, res) => {
     const requests = await Request.find().sort({
       createdAt: -1,
     });
-    
+
     res.json(requests);
   } catch (error) {
     console.error(error.message);
@@ -319,7 +385,6 @@ router.get('/me', auth, async (req, res) => {
       .populate('members')
       .populate('createdby');
 
-    
     res.json(communities);
   } catch (error) {
     console.error(error.message);

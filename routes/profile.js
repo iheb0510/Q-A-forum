@@ -134,6 +134,7 @@ router.get('/:id', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
   try {
     const user = await User.find({ _id: { $ne: req.user._id } })
+      .sort({ points: -1 })
       .populate({ path: 'communities', populate: { path: 'members' } })
       .populate({ path: 'communities', populate: { path: 'createdby' } })
       .select('-password');

@@ -47,7 +47,7 @@ const FindPeopleContainer = () => {
           <Alert fail msg={error} />
         ) : usersList?.length > 0 ? (
           usersList
-            ?.sort((a, b) => (a?.fullname > b?.fullname ? 1 : -1))
+            ?.sort((a, b) => (a?.points < b?.points ? 1 : -1))
             ?.map((user) =>  <User key={user?._id} user={user} />)
         ) : (
           <Alert warning msg='No Users!' />

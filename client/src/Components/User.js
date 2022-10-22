@@ -42,6 +42,17 @@ const User = ({ user }) => {
           </div>
         </div>
       </div>
+      <div>
+        <div className='text-sm bg-yellow-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600'>
+          {user?.points && <i className='mr-2 fas fa-star'></i>}
+          {user?.points}
+          {' points'}
+        </div>
+        <div className='text-sm bg-green-500 text-white font-semibold py-1 px-3 rounded-md focus:outline-none hover:bg-indigo-600'>
+          {user?.badge && <i className='mr-2 fas fa-crown'></i>}
+          {user?.badge}
+        </div>
+      </div>
     </div>
   );
 };

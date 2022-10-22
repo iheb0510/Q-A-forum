@@ -8,9 +8,11 @@ import {
   EDIT_COMMUNITY,
   DELETE_COMMUNITY,
   JOIN_COMMUNITY,
+  EXIT_COMMUNITY,
   GET_REQUESTS,
   ACCEPT_REQUEST,
   REFUSE_REQUEST,
+  DELETE_REQUEST,
   GET_COMMUNITY,
 } from '../actions/types';
 
@@ -65,7 +67,26 @@ export default (state = initialState, action) => {
         ),
         loading: false,
       };
+    case DELETE_REQUEST:
+      return {
+        ...state,
+        requests: state.requests.filter(
+          (Request) => Request._id !== action.payload
+        ),
+        loading: false,
+      };
     case JOIN_COMMUNITY:
+      return {
+        ...state,
+        loading: false,
+        communities: state.communities.map((community) =>
+          community._id === action.payload.id
+            ? action.payload.community
+            : community
+        ),
+        requests: action.payload.requests,
+      };
+    case EXIT_COMMUNITY:
       return {
         ...state,
         loading: false,

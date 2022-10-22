@@ -39,7 +39,7 @@ router.get('/', [auth], async (req, res) => {
     const user = await User.findById(req.user._id).select('-password');
     const questions = await Question.find({
       community: { $in: user.communities },
-    })
+    }).sort({ createdAt: -1 })
       .populate({ path: 'tags', populate: { path: '_id' } })
       .populate('user')
       .populate('community');
