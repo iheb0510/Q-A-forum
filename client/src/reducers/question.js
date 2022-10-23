@@ -144,13 +144,13 @@ export default (state = initialState, action) => {
     case ADD_QUESTION:
       return {
         ...state,
-        questions: [...state.questions, action.payload],
+        questions: [action.payload,...state.questions],
         loading: false,
       };
     case ADD_ANSWER:
       return {
         ...state,
-        answers: [...state.answers, action.payload],
+        answers: [action.payload,...state.answers],
         loading: false,
       };
     case DELETE_QUESTION:

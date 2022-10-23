@@ -52,7 +52,7 @@ const Question = ({ question, details }) => {
 
   useEffect(() => {
     Prism.highlightAll();
-  }, []);
+  }, [question]);
 
   const deleteHandler = (id) => {
     dispatch(deleteQuestion(id));
